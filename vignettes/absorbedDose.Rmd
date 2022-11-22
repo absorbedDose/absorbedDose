@@ -18,7 +18,7 @@ The package <tt>absorbedDose</tt> is developed to calculate the estimated organ 
         following the Chernobyl Nuclear Power Plant accident.
 The details about the model used for dose calculations can be found in 
 
-`r citation("absorbedDose")$textVersion`.
+`r citation("absorbedDose")$textVersion`
 
 ```{r setup}
 library(absorbedDose)
