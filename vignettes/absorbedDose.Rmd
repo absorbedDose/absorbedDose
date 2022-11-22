@@ -1,0 +1,53 @@
+---
+title: "absorbedDose"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{absorbedDose}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The package <tt>absorbedDose</tt> is developed to calculate the estimated organ absorbed dose
+        following the Chernobyl Nuclear Power Plant accident.
+The details about the model used for dose calculations can be found in 
+
+`r citation("absorbedDose")$textVersion`.
+
+```{r setup}
+library(absorbedDose)
+```
+
+## Data set
+
+A data set to calculate the doses should look like the generated sample data set <tt>dose_data</tt>. Each person has a unique id. 
+
+```{r data}
+head(dose_data)
+```
+
+## Example
+
+The function <tt>calculate_dose()</tt> calls functions for data management 
+(<tt>dose_dm()</tt>, <tt>dose_new_variables()</tt>),
+for each dose component (<tt>dose_external()</tt>, <tt>dose_internal_ing()</tt>,
+<tt>dose_internal_milk()</tt>, <tt>dose_inhalation()</tt>) and for the sum of the components (<tt>dose_total()</tt>). 
+The doses are calculated per raw (per each year of the follow-up time).
+
+```{r example}
+doses <- calculate_dose(dose_data, organ_ls = c("Thyroid", "Colon"))
+head(doses)
+```
+
+The function <tt>dose_total_per_person()</tt> sums the above calculated absorbed doses for the follow-up period for each person 
+(for each id) and for each organ.
+```{r example2}
+doses_tot <- dose_total_per_person(doses)
+head(doses_tot)
+```

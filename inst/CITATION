@@ -1,0 +1,20 @@
+citHeader("To cite absorbedDose in publications use:")
+
+citEntry(entry = "manual",
+         title = "Estimating the organ absorbed dose in Swedish
+         inhabitants following the Chernobyl Nuclear Power Plant accident
+         with the R package absorbedDose.",
+         author = personList(as.person("Martin Tondel"),
+                             as.person("Katja Gabrysch"),
+                             as.person("Christopher Rääf"),
+                             as.person("Mats Isaksson")),
+        publisher = "Uppsala University",
+        year = "2022",
+        doi = "10.33063/diva-484911",
+
+        textVersion  =
+           paste("Tondel, M., Gabrysch, K., Rääf, C., Isaksson, M. (2022)
+                 Estimating the organ absorbed dose in Swedish inhabitants
+                 following the Chernobyl Nuclear Power Plant accident with the
+                 R package absorbedDose. Uppsala University. doi: 10.33063/diva-484911.")
+)

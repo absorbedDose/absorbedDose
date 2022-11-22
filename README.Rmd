@@ -1,0 +1,70 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# absorbedDose
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The package  absorbedDose calculates the estimated organ absorbed dose
+        following the Chernobyl Nuclear Power Plant accident.
+        
+The details about the model can be found in 
+`r citation("absorbedDose")$textVersion`
+
+
+
+## Installation
+
+The package <code>absorbedDose</code> can be installed in the following way:
+
+``` R
+# install.packages("devtools")
+devtools::install_github("absorbedDose/absorbedDose")
+```
+
+and then call
+
+```{r libCall}
+library("absorbedDose")
+```
+
+## Data set
+
+A data set to calculate the doses should look like the generated sample data set <code>dose_data</code>: 
+
+```{r data}
+print(dose_data, nrow=10)
+```
+
+## Calculation of the absorbed dose
+
+The function <code>calculate_dose</code> calls functions for data management 
+(<code>dose_dm</code>, <code>dose_new_variables</code>),
+for calculation of each dose component (<code>dose_external</code>, <code>dose_internal_ing</code>,
+<code>dose_internal_milk</code>, <code>dose_inhalation</code>), 
+and for adding the dose components <code>dose_total</code>). 
+The doses are calculated per row (per year of follow-up time).
+
+```{r example}
+doses_row <- calculate_dose(dose_data, organ_ls=c("Colon", "Thyroid"))
+```
+
+To get the total absorbed dose under the follow-up period for each person 
+(for each id) call:
+```{r example2}
+doses_id <- dose_total_per_person(doses_row)
+```
+
