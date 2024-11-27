@@ -34,8 +34,8 @@ dose_times <-  function(y,x){x*y}
 dose_dm <- function(data,
                     Chernobyl_date = "1986-04-28",
                     last_follow_up_date = NULL,
-                    codes_county = tab_county$Code,
-                    codes_municipality = tab_fshield$Code, ...)
+                    codes_county = absorbedDose::tab_county$Code,
+                    codes_municipality = absorbedDose::tab_fshield$Code, ...)
 {
   ### copy the data set
   ### otherwise the original data would change
@@ -317,9 +317,9 @@ dose_external <- function(data,
                           d_Cs = 1.016856,
                           phi_kerma = 0.83,
                           f_out = 0.2,
-                          tb_Fsnow = tab_county[,.(Code, F_snow)],
-                          tb_fshield = tab_fshield,
-                          tb_organ = tab_organ,
+                          tb_Fsnow = absorbedDose::tab_county[,.(Code, F_snow)],
+                          tb_fshield = absorbedDose::tab_fshield,
+                          tb_organ = absorbedDose::tab_organ,
                           organ_ls = tb_organ$Organ, ...)
 {
   data.copy <- data
@@ -341,11 +341,11 @@ dose_external <- function(data,
   setnames(data.copy, "Code", "municipality")
 
   k_SEQ_organ_M <- tb_organ$k_SEQ_organ_m
-  names(k_SEQ_organ_M) <- gsub(" ", "_", tab_organ$Organ)
+  names(k_SEQ_organ_M) <- gsub(" ", "_", tb_organ$Organ)
   k_SEQ_organ_M <- k_SEQ_organ_M[names(k_SEQ_organ_M) %in% organ_ls]
 
   k_SEQ_organ_F <- tb_organ$k_SEQ_organ_f
-  names(k_SEQ_organ_F) <- gsub(" ", "_", tab_organ$Organ)
+  names(k_SEQ_organ_F) <- gsub(" ", "_", tb_organ$Organ)
   k_SEQ_organ_F <- k_SEQ_organ_F[names(k_SEQ_organ_F) %in% organ_ls]
 
   ### organ dose for adults
@@ -360,8 +360,8 @@ dose_external <- function(data,
   {
     organ <- organ_ls[organ.n]
     ### read k_seq coefficients for children - gender dependent
-    coef_f <- as.matrix(tab_organ[Organ == organ.n, paste0("a", 0:3, "_f")])
-    coef_m <- as.matrix(tab_organ[Organ == organ.n, paste0("a", 0:3, "_m")])
+    coef_f <- as.matrix(tb_organ[Organ == organ.n, paste0("a", 0:3, "_f")])
+    coef_m <- as.matrix(tb_organ[Organ == organ.n, paste0("a", 0:3, "_m")])
     data.copy[age < 20 & sex == "W",
               k_r_int := dose_int_r_t_child(age = age - start_time, t = stop_time,
                                             a0 = coef_f[1], a1 = coef_f[2],
@@ -376,8 +376,8 @@ dose_external <- function(data,
                 dose_int_r_t_child(age = age - start_time, t = start_time,
                                    a0 = coef_m[1], a1 = coef_m[2],
                                    a2 = coef_m[3], a3 = coef_m[4])]
-    k_seqF <- tab_organ[Organ == organ.n, k_SEQ_organ_f]
-    k_seqM <- tab_organ[Organ == organ.n, k_SEQ_organ_m]
+    k_seqF <- tb_organ[Organ == organ.n, k_SEQ_organ_f]
+    k_seqM <- tb_organ[Organ == organ.n, k_SEQ_organ_m]
     data.copy[sex == "W" & age < 20, (paste0("Dext_", organ)) := tmp_ext * k_r_int * k_seqF]
     data.copy[sex == "M" & age < 20, (paste0("Dext_", organ)) := tmp_ext * k_r_int * k_seqM]
   }
@@ -454,8 +454,8 @@ dose_internal_ing <- function(data,
                               S_aliment = 1,
                               FR = 0.56,
                               f_sex = 0.61,
-                              tb_Aesd = tab_county[,.(Code, A_esd)],
-                              tb_organ = tab_organ,
+                              tb_Aesd = absorbedDose::tab_county[,.(Code, A_esd)],
+                              tb_organ = absorbedDose::tab_organ,
                               organ_ls = tb_organ$Organ, ...)
 {
   data.copy <- data
@@ -491,18 +491,18 @@ dose_internal_ing <- function(data,
   weight_adultF <- 63
   weight_adultM <- 78
 
-  k_organ_Cs_137F <- tab_organ$Cs137_f * 3600*24*365.25*1000 * weight_adultF^0.889
-  names(k_organ_Cs_137F) <- gsub(" ", "_", tab_organ$Organ)
+  k_organ_Cs_137F <- tb_organ$Cs137_f * 3600*24*365.25*1000 * weight_adultF^0.889
+  names(k_organ_Cs_137F) <- gsub(" ", "_", tb_organ$Organ)
   k_organ_Cs_137F <- k_organ_Cs_137F[names(k_organ_Cs_137F) %in% organ_ls]
-  k_organ_Cs_137M <- tab_organ$Cs137_m * 3600*24*365.25*1000 * weight_adultM^0.889
-  names(k_organ_Cs_137M) <- gsub(" ", "_", tab_organ$Organ)
+  k_organ_Cs_137M <- tb_organ$Cs137_m * 3600*24*365.25*1000 * weight_adultM^0.889
+  names(k_organ_Cs_137M) <- gsub(" ", "_", tb_organ$Organ)
   k_organ_Cs_137M <- k_organ_Cs_137M[names(k_organ_Cs_137M) %in% organ_ls]
 
-  k_organ_Cs_134F <- tab_organ$Cs134_f * 3600*24*365.25*1000 * weight_adultF^0.812
-  names(k_organ_Cs_134F) <- gsub(" ", "_", tab_organ$Organ)
+  k_organ_Cs_134F <- tb_organ$Cs134_f * 3600*24*365.25*1000 * weight_adultF^0.812
+  names(k_organ_Cs_134F) <- gsub(" ", "_", tb_organ$Organ)
   k_organ_Cs_134F <- k_organ_Cs_134F[names(k_organ_Cs_134F) %in% organ_ls]
-  k_organ_Cs_134M <- tab_organ$Cs134_m * 3600*24*365.25*1000 * weight_adultM^0.812
-  names(k_organ_Cs_134M) <- gsub(" ", "_", tab_organ$Organ)
+  k_organ_Cs_134M <- tb_organ$Cs134_m * 3600*24*365.25*1000 * weight_adultM^0.812
+  names(k_organ_Cs_134M) <- gsub(" ", "_", tb_organ$Organ)
   k_organ_Cs_134M <- k_organ_Cs_134M[names(k_organ_Cs_134M) %in% organ_ls]
 
   data.copy[, tmp137 :=  A_esd * T_ag * S_aliment *  fsex * weight^0.111 * (int_137_stop - int_137_start)]
@@ -569,7 +569,7 @@ dose_internal_ing <- function(data,
 #' organ_ls = c("Thyroid", "Colon"))
 dose_internal_milk <- function(data,
                                k_delay = 0.74,
-                               tb_c_milk = tab_county[,.(Code, c_milk)],
+                               tb_c_milk = absorbedDose::tab_county[,.(Code, c_milk)],
                                organ_ls = "Thyroid", ...)
 {
   data.copy <- data
@@ -628,7 +628,7 @@ dose_internal_milk <- function(data,
 #' organ_ls = c("Thyroid", "Colon"))
 dose_inhalation <- function(data,
                             k_th_E = 20,
-                            tb_E_inh = tab_county[,.(Code, E_inh)],
+                            tb_E_inh = absorbedDose::tab_county[,.(Code, E_inh)],
                             organ_ls = "Thyroid", ...)
 {
   data.copy <- data
@@ -672,7 +672,7 @@ dose_inhalation <- function(data,
 #' @seealso \code{\link{dose_external}}, \code{\link{dose_internal_ing}},
 #' \code{\link{dose_internal_milk}}, \code{\link{dose_inhalation}}
 dose_total <- function(data,
-                       organ_ls = tab_organ$Organ, ...)
+                       organ_ls = absorbedDose::tab_organ$Organ, ...)
 {
   data.copy <- data
 
@@ -764,19 +764,32 @@ dose_total_per_person <- function(data)
 #' @examples calculate_dose(data = dose_data, organ_ls = c("Thyroid", "Colon"))
 calculate_dose <- function(data,
                            Chernobyl_date = as.Date("1986-04-28", format = c("%Y-%m-%d")),
-                           tab_county = tab_county,
-                           tab_fshield = tab_fshield,
-                           tab_organ = tab_organ, ...)
+                           tb_county = absorbedDose::tab_county,
+                           tb_fshield = absorbedDose::tab_fshield,
+                           tb_organ = absorbedDose::tab_organ, 
+                           organ_ls = tb_organ$Organ, ...)
 {
   data.copy <- copy(data)
 
-  data.copy <- dose_dm(data = data.copy, ...)
+  data.copy <- dose_dm(data = data.copy, 
+                       codes_county = tb_county$Code,
+                       codes_municipality = tb_fshield$Code, ...)
   data.copy <- dose_new_variables(data = data.copy, ...)
-  data.copy <- dose_external(data = data.copy, ...)
-  data.copy <- dose_internal_ing(data = data.copy, ...)
-  data.copy <- dose_internal_milk(data = data.copy, ...)
-  data.copy <- dose_inhalation(data = data.copy, ...)
-  data.copy <- dose_total(data = data.copy, ...)
+  data.copy <- dose_external(data = data.copy, 
+                             tb_Fsnow = tb_county[,.(Code, F_snow)],
+                             tb_fshield = tb_fshield,
+                             tb_organ = tb_organ, 
+                             organ_ls = organ_ls, ...)
+  data.copy <- dose_internal_ing(data = data.copy, 
+                                 tb_Aesd = tb_county[,.(Code, A_esd)], 
+                                 tb_organ = tb_organ, 
+                                 organ_ls = organ_ls, ...)
+  data.copy <- dose_internal_milk(data = data.copy, 
+                                  tb_c_milk = tb_county[,.(Code, c_milk)], ...)
+  data.copy <- dose_inhalation(data = data.copy, 
+                               tb_E_inh = tb_county[,.(Code, E_inh)], ...)
+  data.copy <- dose_total(data = data.copy, 
+                          organ_ls = organ_ls, ...)
 
   data.copy[, `:=`(start_time = NULL,
                    stop_time = NULL,
