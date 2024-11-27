@@ -517,6 +517,9 @@ dose_internal_ing <- function(data,
   data.copy[sex == "M",
             (paste0(paste0("Dint_", names(k_organ_Cs_134M)), 134)) := lapply(k_organ_Cs_134M, dose_times, tmp134)]
 
+  old_dose_col <- intersect(names(data.copy), paste0("Dint_", organ_ls))
+  if (length(old_dose_col) > 0) data.copy[,(old_dose_col) := NULL]
+  
   for (organ in organ_ls){
     data.copy[, paste0("Dint_", organ) := Reduce(`+`, .SD), .SDcols=grep(paste0("Dint_", organ), names(data.copy))]
     data.copy[, (paste0(paste0("Dint_", organ), 137)) := NULL]
