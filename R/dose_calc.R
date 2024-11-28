@@ -519,7 +519,7 @@ dose_internal_ing <- function(data,
 
   old_dose_col <- intersect(names(data.copy), paste0("Dint_", organ_ls))
   if (length(old_dose_col) > 0) data.copy[,(old_dose_col) := NULL]
-  
+
   for (organ in organ_ls){
     data.copy[, paste0("Dint_", organ) := Reduce(`+`, .SD), .SDcols=grep(paste0("Dint_", organ), names(data.copy))]
     data.copy[, (paste0(paste0("Dint_", organ), 137)) := NULL]
@@ -749,12 +749,14 @@ dose_total_per_person <- function(data)
 #'
 #' @param data data table with variables as in \code{\link{dose_data}}.
 #' @param Chernobyl_date starting date for calculations of the dose components.
-#' @param tab_county table with county dependent parameters,
+#' @param tb_county table with county dependent parameters,
 #' it should have column names like \code{\link{tab_county}}.
-#' @param tab_fshield table with municipality dependent parameter f_shield,
+#' @param tb_fshield table with municipality dependent parameter f_shield,
 #' it should have columns Code and `f_shield`, like \code{\link{tab_fshield}}.
-#' @param tab_organ table with organ dependent parameters, it should have
+#' @param tb_organ table with organ dependent parameters, it should have
 #' columns like \code{\link{tab_organ}}.
+#' @param organ_ls list of cancer sites (organs) to calculate the dose for,
+#' all organs should have coefficients in `tb_organ`.
 #' @param ... further arguments passed to the functions for data
 #' management and calculation of the dose components.
 #'
@@ -769,29 +771,29 @@ calculate_dose <- function(data,
                            Chernobyl_date = as.Date("1986-04-28", format = c("%Y-%m-%d")),
                            tb_county = absorbedDose::tab_county,
                            tb_fshield = absorbedDose::tab_fshield,
-                           tb_organ = absorbedDose::tab_organ, 
+                           tb_organ = absorbedDose::tab_organ,
                            organ_ls = tb_organ$Organ, ...)
 {
   data.copy <- copy(data)
 
-  data.copy <- dose_dm(data = data.copy, 
+  data.copy <- dose_dm(data = data.copy,
                        codes_county = tb_county$Code,
                        codes_municipality = tb_fshield$Code, ...)
   data.copy <- dose_new_variables(data = data.copy, ...)
-  data.copy <- dose_external(data = data.copy, 
+  data.copy <- dose_external(data = data.copy,
                              tb_Fsnow = tb_county[,.(Code, F_snow)],
                              tb_fshield = tb_fshield,
-                             tb_organ = tb_organ, 
+                             tb_organ = tb_organ,
                              organ_ls = organ_ls, ...)
-  data.copy <- dose_internal_ing(data = data.copy, 
-                                 tb_Aesd = tb_county[,.(Code, A_esd)], 
-                                 tb_organ = tb_organ, 
+  data.copy <- dose_internal_ing(data = data.copy,
+                                 tb_Aesd = tb_county[,.(Code, A_esd)],
+                                 tb_organ = tb_organ,
                                  organ_ls = organ_ls, ...)
-  data.copy <- dose_internal_milk(data = data.copy, 
+  data.copy <- dose_internal_milk(data = data.copy,
                                   tb_c_milk = tb_county[,.(Code, c_milk)], ...)
-  data.copy <- dose_inhalation(data = data.copy, 
+  data.copy <- dose_inhalation(data = data.copy,
                                tb_E_inh = tb_county[,.(Code, E_inh)], ...)
-  data.copy <- dose_total(data = data.copy, 
+  data.copy <- dose_total(data = data.copy,
                           organ_ls = organ_ls, ...)
 
   data.copy[, `:=`(start_time = NULL,

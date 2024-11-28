@@ -2,6 +2,7 @@
 
 export(calculate_dose)
 export(dose_dm)
+export(dose_effective)
 export(dose_external)
 export(dose_inhalation)
 export(dose_internal_ing)
