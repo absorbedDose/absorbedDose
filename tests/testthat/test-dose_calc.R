@@ -31,18 +31,21 @@ test_that("milk", {
 
 test_that("inhalation", {
   d <- dose_inhalation(dose_new_variables(dose_dm(data = dose_data)),
-                     organ_ls = c("Thyroid"))
+                       tb_E_inh = tab_county_2023[, .(Code, E_inh)],
+                       organ_ls = c("Thyroid"))
   expect_equal(mean(d$Dinh_Thyroid), 0.01018488, tolerance = 10^(-6))
 })
 
 test_that("all", {
   d <- calculate_dose(data = dose_data,
-                       organ_ls = c("Colon"))
+                      tb_county = tab_county_2023,
+                      organ_ls = c("Colon"))
   expect_equal(mean(d$Dtot_Colon), 0.04963588, tolerance = 10^(-6))
 })
 
 test_that("all id", {
   d <- dose_total_per_person(calculate_dose(data = dose_data,
-                      organ_ls = c("Colon")))
+                                            tb_county = tab_county_2023,
+                                            organ_ls = c("Colon")))
   expect_equal(mean(d$Dtot_Colon), 1.165691, tolerance = 10^(-6))
 })
