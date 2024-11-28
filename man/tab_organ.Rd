@@ -21,7 +21,7 @@ females and males, respectively}
 }
 }
 \source{
-Tondel, M., Gabrysch, K., Rääf, C., Isaksson, M. (2022)
+Tondel, M., Gabrysch, K., Rääf, C., Isaksson, M. (2023)
 Estimating the organ absorbed dose in Swedish inhabitants
 following the Chernobyl Nuclear Power Plant accident with the
 R package absorbedDose. Uppsala University. doi: 10.33063/diva-484911.

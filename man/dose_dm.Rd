@@ -8,8 +8,8 @@ dose_dm(
   data,
   Chernobyl_date = "1986-04-28",
   last_follow_up_date = NULL,
-  codes_county = tab_county$Code,
-  codes_municipality = tab_fshield$Code,
+  codes_county = absorbedDose::tab_county$Code,
+  codes_municipality = absorbedDose::tab_fshield$Code,
   ...
 )
 }

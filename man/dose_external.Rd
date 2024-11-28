@@ -9,9 +9,9 @@ dose_external(
   d_Cs = 1.016856,
   phi_kerma = 0.83,
   f_out = 0.2,
-  tb_Fsnow = tab_county[, .(Code, F_snow)],
-  tb_fshield = tab_fshield,
-  tb_organ = tab_organ,
+  tb_Fsnow = absorbedDose::tab_county[, .(Code, F_snow)],
+  tb_fshield = absorbedDose::tab_fshield,
+  tb_organ = absorbedDose::tab_organ,
   organ_ls = tb_organ$Organ,
   ...
 )

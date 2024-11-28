@@ -4,7 +4,7 @@
 \alias{dose_total}
 \title{Calculation of the total absorbed dose}
 \usage{
-dose_total(data, organ_ls = tab_organ$Organ, ...)
+dose_total(data, organ_ls = absorbedDose::tab_organ$Organ, ...)
 }
 \arguments{
 \item{data}{data table with variables for doses, like

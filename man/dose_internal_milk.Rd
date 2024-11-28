@@ -7,7 +7,7 @@
 dose_internal_milk(
   data,
   k_delay = 0.74,
-  tb_c_milk = tab_county[, .(Code, c_milk)],
+  tb_c_milk = absorbedDose::tab_county[, .(Code, c_milk)],
   organ_ls = "Thyroid",
   ...
 )

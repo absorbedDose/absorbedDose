@@ -9,8 +9,8 @@ dose_internal_ing(
   S_aliment = 1,
   FR = 0.56,
   f_sex = 0.61,
-  tb_Aesd = tab_county[, .(Code, A_esd)],
-  tb_organ = tab_organ,
+  tb_Aesd = absorbedDose::tab_county[, .(Code, A_esd)],
+  tb_organ = absorbedDose::tab_organ,
   organ_ls = tb_organ$Organ,
   ...
 )

@@ -6,21 +6,20 @@
 \alias{tab_county}
 \title{County dependent parameters}
 \format{
-A data set in data.table format with 24 rows and 6 variables:
+A data set in data.table format with 21 rows and 6 variables:
 \describe{
-\item{Code}{codes of Swedish counties, values: 1--25, without 2}
+\item{Code}{codes of Swedish counties, values: 1--25, without 2, 11, 15, 16}
 \item{County}{names of the counties}
-\item{A_esd}{kBq/m^2 }
+\item{A_esd}{average deposition of Cs-137, kBq/m^2 }
 \item{F_snow}{dimensionless}
 \item{c_milk}{time-integrated activity concentrations in milk, Bq d/kg}
 \item{E_inh}{µSv}
 }
 }
 \source{
-Tondel, M., Gabrysch, K., Rääf, C., Isaksson, M. (2022)
-Estimating the organ absorbed dose in Swedish inhabitants
-following the Chernobyl Nuclear Power Plant accident with the
-R package absorbedDose. Uppsala University. doi: 10.33063/diva-484911.
+Tondel M, Gabrysch K, Rääf C, Isaksson M. (2024)
+A model for estimating radiation doses and population cancer risk in Sweden
+after the Chernobyl Nuclear Power Plant accident in 1986. Uppsala University. doi:.
 }
 \usage{
 tab_county

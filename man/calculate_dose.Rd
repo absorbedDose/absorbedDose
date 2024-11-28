@@ -7,9 +7,10 @@
 calculate_dose(
   data,
   Chernobyl_date = as.Date("1986-04-28", format = c("\%Y-\%m-\%d")),
-  tab_county = tab_county,
-  tab_fshield = tab_fshield,
-  tab_organ = tab_organ,
+  tb_county = absorbedDose::tab_county,
+  tb_fshield = absorbedDose::tab_fshield,
+  tb_organ = absorbedDose::tab_organ,
+  organ_ls = tb_organ$Organ,
   ...
 )
 }
@@ -17,6 +18,9 @@ calculate_dose(
 \item{data}{data table with variables as in \code{\link{dose_data}}.}
 
 \item{Chernobyl_date}{starting date for calculations of the dose components.}
+
+\item{...}{further arguments passed to the functions for data
+management and calculation of the dose components.}
 
 \item{tab_county}{table with county dependent parameters,
 it should have column names like \code{\link{tab_county}}.}
@@ -26,9 +30,6 @@ it should have columns Code and \code{f_shield}, like \code{\link{tab_fshield}}.
 
 \item{tab_organ}{table with organ dependent parameters, it should have
 columns like \code{\link{tab_organ}}.}
-
-\item{...}{further arguments passed to the functions for data
-management and calculation of the dose components.}
 }
 \value{
 data set with original variables and external dose,

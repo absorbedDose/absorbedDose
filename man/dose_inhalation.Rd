@@ -7,7 +7,7 @@
 dose_inhalation(
   data,
   k_th_E = 20,
-  tb_E_inh = tab_county[, .(Code, E_inh)],
+  tb_E_inh = absorbedDose::tab_county[, .(Code, E_inh)],
   organ_ls = "Thyroid",
   ...
 )
