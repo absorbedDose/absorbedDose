@@ -22,18 +22,40 @@
 #'
 #' A table with values of A_{esd}, F_{snow}, c_{milk} and E_{inh} per county.
 #'
+#' @format A data set in data.table format with 21 rows and 6 variables:
+#' \describe{
+#' \item{Code}{codes of Swedish counties, values: 1--25, without 2, 11, 15, 16}
+#' \item{County}{names of the counties}
+#' \item{A_esd}{average deposition of Cs-137, kBq/m^2 }
+#' \item{F_snow}{dimensionless}
+#' \item{c_milk}{time-integrated activity concentrations in milk, Bq d/kg}
+#' \item{E_inh}{µSv}
+#' }
+#' @encoding UTF-8
+#' @source Tondel M, Gabrysch K, Rääf C, Isaksson M. (2024)
+#' A model for estimating radiation doses and population cancer risk in Sweden
+#' after the Chernobyl Nuclear Power Plant accident in 1986. Uppsala University. doi:.
+"tab_county"
+
+#' County dependent parameters used in 2023
+#'
+#' A table with values of A_{esd}, F_{snow}, c_{milk} and E_{inh} per county.
+#'
+#' `r lifecycle::badge("superseded")`
+#' Replaced with \code{\link{tab_county}}.
+#'
 #' @format A data set in data.table format with 24 rows and 6 variables:
 #' \describe{
 #' \item{Code}{codes of Swedish counties, values: 1--25, without 2}
 #' \item{County}{names of the counties}
-#' \item{A_esd}{kBq/m^2 }
+#' \item{A_esd}{average deposition of Cs-137, kBq/m^2 }
 #' \item{F_snow}{dimensionless}
 #' \item{c_milk}{time-integrated activity concentrations in milk, Bq d/kg}
 #' \item{E_inh}{µSv}
 #' }
 #' @encoding UTF-8
 #' @source `r citation("absorbedDose")$textVersion`
-"tab_county"
+"tab_county_2023"
 
 #' Shielding factor
 #'
@@ -48,6 +70,27 @@
 #' @encoding UTF-8
 #' @source `r citation("absorbedDose")$textVersion`
 "tab_fshield"
+
+#' Municipality dependent parameters
+#'
+#' A table with values of the average deposition, shielding factor f_shield and
+#' percentage of hunter households per municipality.
+#'
+#' @format A data set in data.table format with 290 rows and 7 variables:
+#' \describe{
+#' \item{Code}{code of Swedish municipalities}
+#' \item{municipality_name}{names of the municipalities}
+#' \item{county}{codes of Swedish counties}
+#' \item{county_name}{names of the counties}
+#' \item{cesium}{average deposition of Cs-137, kBq/m^2}
+#' \item{f_shield}{dimensionless, same as in \code{\link{tab_fshield}}.}
+#' \item{hunter_perc}{percentage of hunter households}
+#' }
+#' @encoding UTF-8
+#' @source Tondel M, Gabrysch K, Rääf C, Isaksson M. (2024)
+#' A model for estimating radiation doses and population cancer risk in Sweden
+#' after the Chernobyl Nuclear Power Plant accident in 1986. Uppsala University. doi:.
+"tab_municip"
 
 #' Cancer site dependent parameters
 #'
@@ -74,3 +117,19 @@
 #' @encoding UTF-8
 #' @source `r citation("absorbedDose")$textVersion`
 "tab_organ"
+
+#' Tissue weighting factors
+#'
+#' A table with tissue weighting factors.
+#'
+#'@encoding UTF-8
+#' @format A data set in data.table format with 17 rows and 2 variables:
+#' \describe{
+#' \item{Organ}{names of the tissue}
+#' \item{w_T}{tissue weighting factor}
+#' }
+#' @encoding UTF-8
+#' @source ICRP (2007). ICRP Publication 103: The 2007 recommendations of the
+#' international commission on radiological protection. Ann. ICRP 37.2–4, pp. 1–332.
+#' doi: 10.1016/j.icrp.2007.10.003.
+"tab_wT"
