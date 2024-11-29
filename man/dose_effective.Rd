@@ -6,17 +6,23 @@
 \usage{
 dose_effective(
   data,
-  tb_county = tab_county,
-  tb_fshield = tab_fshield,
-  tb_organ = tab_organ,
+  tb_county = absorbedDose::tab_county,
+  tb_fshield = absorbedDose::tab_fshield,
+  tb_organ = absorbedDose::tab_organ,
   organ_column = "ICRP_risk_organ",
-  tb_wT = tab_wT,
+  tb_wT = absorbedDose::tab_wT,
   ...
 )
 }
 \arguments{
 \item{data}{data table with all variables as in the data set returned from
 \code{\link{dose_new_variables}}.}
+
+\item{tb_county}{table with county dependent parameters,
+it should have column names like \code{\link{tab_county}}.}
+
+\item{tb_fshield}{table with municipality dependent parameter f_shield,
+it should have columns Code and \code{f_shield}, like \code{\link{tab_fshield}}.}
 
 \item{tb_organ}{coefficients per tissue (organ),
 table with columns like \code{\link{tab_organ}}.}
@@ -28,12 +34,6 @@ Tissue names need to be the same as in \code{tb_wT}.}
 table with columns  Organ and w_T.}
 
 \item{...}{}
-
-\item{tab_county}{table with county dependent parameters,
-it should have column names like \code{\link{tab_county}}.}
-
-\item{tab_fshield}{table with municipality dependent parameter f_shield,
-it should have columns Code and \code{f_shield}, like \code{\link{tab_fshield}}.}
 }
 \value{
 data set with original variables and effective dose per row,

@@ -19,17 +19,20 @@ calculate_dose(
 
 \item{Chernobyl_date}{starting date for calculations of the dose components.}
 
-\item{...}{further arguments passed to the functions for data
-management and calculation of the dose components.}
-
-\item{tab_county}{table with county dependent parameters,
+\item{tb_county}{table with county dependent parameters,
 it should have column names like \code{\link{tab_county}}.}
 
-\item{tab_fshield}{table with municipality dependent parameter f_shield,
+\item{tb_fshield}{table with municipality dependent parameter f_shield,
 it should have columns Code and \code{f_shield}, like \code{\link{tab_fshield}}.}
 
-\item{tab_organ}{table with organ dependent parameters, it should have
+\item{tb_organ}{table with organ dependent parameters, it should have
 columns like \code{\link{tab_organ}}.}
+
+\item{organ_ls}{list of cancer sites (organs) to calculate the dose for,
+all organs should have coefficients in \code{tb_organ}.}
+
+\item{...}{further arguments passed to the functions for data
+management and calculation of the dose components.}
 }
 \value{
 data set with original variables and external dose,

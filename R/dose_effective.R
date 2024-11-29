@@ -37,11 +37,11 @@
 #' @examples dose_effective(data = dose_new_variables(dose_dm(dose_data)))
 
 dose_effective <- function(data,
-                           tb_county = tab_county,
-                           tb_fshield = tab_fshield,
-                           tb_organ = tab_organ,
+                           tb_county = absorbedDose::tab_county,
+                           tb_fshield = absorbedDose::tab_fshield,
+                           tb_organ = absorbedDose::tab_organ,
                            organ_column = "ICRP_risk_organ",
-                           tb_wT = tab_wT, ...)
+                           tb_wT = absorbedDose::tab_wT, ...)
 {
   data.copy <- copy(data)
   tb_organ_eff <- copy(tb_organ)
@@ -50,7 +50,6 @@ dose_effective <- function(data,
   organ_ls <- tab_wT$Organ
 
   if (length(setdiff(organ_ls, tb_organ_eff$Organ)) > 0) stop("Some organs missing for the calculation of the effective dose.")
-  #if (length(setdiff(organ_ls, tb_wT$Organ)) > 0) stop("Weighting function for some organ is missing.")
 
   # remove previous dose columns from data.copy
   old_dose_col <- names(data.copy)[grep("^Dext|^Dint|^Dinh|^Dmilk|^Dtot", names(data.copy))]
