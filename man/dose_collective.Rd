@@ -28,11 +28,11 @@ dose_collective(LAR(data = calculate_dose(dose_data),
                               dose_comp = "tot",
                               organ_ls = c("Colon", "Thyroid")),
                           prefix = "LAR_")
-         dose_collective(LAR(data = calculate_dose(dose_data),
-                             dose_comp = "tot",
-                             organ_ls = c("Colon", "Thyroid")),
-                        prefix = NULL,
-                        cols = c("LAR_tot_Colon", "LAR_tot_Thyroid"))
+dose_collective(LAR(data = calculate_dose(dose_data),
+                    dose_comp = "tot",
+                    organ_ls = c("Colon", "Thyroid")),
+                prefix = NULL,
+                cols = c("LAR_tot_Colon", "LAR_tot_Thyroid"))
 }
 \seealso{
 \code{\link{calculate_dose}}, \code{\link{LAR}}

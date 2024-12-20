@@ -36,7 +36,12 @@ the effective dose variables have names \code{LAR_comp_organ_name}.
 Calculates LAR for every row in the data set.
 }
 \examples{
-LAR(data = calculate_dose(dose_data), dose_comp = "tot", organ_ls = c("Colon", "Thyroid"))
+tab_organ_LAR <- data.table::copy(tab_organ)
+tab_organ_LAR[, Organ := EPA_cancer_site]
+tab_organ_LAR <- tab_organ_LAR[!is.na(Organ), ]
+LAR(data = calculate_dose(dose_data, tb_organ = tab_organ_LAR),
+            dose_comp = "tot",
+            organ_ls = c("Colon", "Thyroid"))
 }
 \seealso{
 \code{\link{calculate_dose}}

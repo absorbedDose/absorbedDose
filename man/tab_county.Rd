@@ -17,9 +17,10 @@ A data set in data.table format with 21 rows and 6 variables:
 }
 }
 \source{
-Tondel M, Gabrysch K, Rääf C, Isaksson M. (2024)
+Tondel M, Gabrysch K, Rääf C, Isaksson M. (2025)
 A model for estimating radiation doses and population cancer risk in Sweden
-after the Chernobyl Nuclear Power Plant accident in 1986. Uppsala University. doi:.
+after the Chernobyl Nuclear Power Plant accident in 1986. Uppsala University.
+doi:10.33063/diva-544175.
 }
 \usage{
 tab_county

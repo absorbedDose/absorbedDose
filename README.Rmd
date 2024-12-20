@@ -21,8 +21,17 @@ knitr::opts_chunk$set(
 The package  absorbedDose calculates the estimated organ absorbed dose
         following the Chernobyl Nuclear Power Plant accident.
         
-The details about the model can be found in 
+The details about the model to calculate the organ absorbed dose can be found in:
+
 `r citation("absorbedDose")$textVersion`
+
+The details about the model to calculate the number of attributable cancer cases and the effective dose
+can be found in:
+
+Tondel M, Gabrysch K, Rääf C, Isaksson M. (2025)
+A model for estimating radiation doses and population cancer risk in Sweden
+after the Chernobyl Nuclear Power Plant accident in 1986. Uppsala University.
+doi:10.33063/diva-544175.
 
 
 
@@ -46,7 +55,7 @@ library("absorbedDose")
 A data set to calculate the doses should look like the generated sample data set <code>dose_data</code>: 
 
 ```{r data}
-print(dose_data, nrow=10)
+print(dose_data, nrow = 10)
 ```
 
 ## Calculation of the absorbed dose
@@ -59,7 +68,7 @@ and for adding the dose components <code>dose_total</code>).
 The doses are calculated per row (per year of follow-up time).
 
 ```{r example}
-doses_row <- calculate_dose(dose_data, organ_ls=c("Colon", "Thyroid"))
+doses_row <- calculate_dose(dose_data, organ_ls = c("Colon", "Thyroid"))
 ```
 
 To get the total absorbed dose under the follow-up period for each person 

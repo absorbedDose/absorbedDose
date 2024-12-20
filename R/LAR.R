@@ -54,7 +54,13 @@ LAR_coef_lin_int <- function(age, tab) {
 #'
 #' @seealso \code{\link{calculate_dose}}
 #'
-#' @examples LAR(data = calculate_dose(dose_data), dose_comp = "tot", organ_ls = c("Colon", "Thyroid"))
+#' @examples
+#' tab_organ_LAR <- data.table::copy(tab_organ)
+#' tab_organ_LAR[, Organ := EPA_cancer_site]
+#' tab_organ_LAR <- tab_organ_LAR[!is.na(Organ), ]
+#' LAR(data = calculate_dose(dose_data, tb_organ = tab_organ_LAR),
+#'             dose_comp = "tot",
+#'             organ_ls = c("Colon", "Thyroid"))
 LAR <- function(data,
                 dose_comp = c("ext", "int", "milk", "inh", "tot"),
                 organ_ls = absorbedDose::tab_organ[!is.na(EPA_cancer_site), EPA_cancer_site],
@@ -151,11 +157,11 @@ LAR <- function(data,
 #'                               dose_comp = "tot",
 #'                               organ_ls = c("Colon", "Thyroid")),
 #'                           prefix = "LAR_")
-#'          dose_collective(LAR(data = calculate_dose(dose_data),
-#'                              dose_comp = "tot",
-#'                              organ_ls = c("Colon", "Thyroid")),
-#'                         prefix = NULL,
-#'                         cols = c("LAR_tot_Colon", "LAR_tot_Thyroid"))
+#' dose_collective(LAR(data = calculate_dose(dose_data),
+#'                     dose_comp = "tot",
+#'                     organ_ls = c("Colon", "Thyroid")),
+#'                 prefix = NULL,
+#'                 cols = c("LAR_tot_Colon", "LAR_tot_Thyroid"))
 dose_collective <- function(data,
                             by.var = c("year", "sex"),
                             prefix = "LAR_",

@@ -38,6 +38,7 @@ ul.task-list{list-style: none;}
 </style>
 
 
+
 <style type="text/css">
 code {
 white-space: pre;
@@ -118,13 +119,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -336,15 +344,22 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 estimated organ absorbed dose following the Chernobyl Nuclear Power
 Plant accident. The details about the used model for dose calculation
 can be found in</p>
-<p>Tondel, M., Gabrysch, K., Rääf, C., Isaksson, M. (2022) Estimating
+<p>Tondel, M., Gabrysch, K., Rääf, C., Isaksson, M. (2023) Estimating
 the organ absorbed dose in Swedish inhabitants following the Chernobyl
-Nuclear Power Plant accident with the R package absorbedDose.</p>
+Nuclear Power Plant accident with the R package absorbedDose. Uppsala
+University. doi: 10.33063/diva-484911.</p>
+<p>The details about the model to calculate the number of attributable
+cancer cases and the effective dose can be found in</p>
+<p>Tondel M, Gabrysch K, Rääf C, Isaksson M. (2025) A model for
+estimating radiation doses and population cancer risk in Sweden after
+the Chernobyl Nuclear Power Plant accident in 1986. Uppsala University.
+<a href="doi:10.33063/diva-544175" class="uri">doi:10.33063/diva-544175</a>.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(absorbedDose)</span></code></pre></div>
 <div id="data-set" class="section level2">
 <h2>Data set</h2>
 <p>A data set to calculate the doses should look like the generated
 sample data set <tt>dose_data</tt>. Each person has a unique id.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(dose_data, <span class="at">nrow=</span><span class="dv">10</span>)</span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(dose_data, <span class="at">nrow =</span> <span class="dv">10</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        id year date_birth sex  household event_type date_event   cesium</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:   1 1986 1975-08-19   M     Hunter       &lt;NA&gt;       &lt;NA&gt; 8.926435</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:   1 1987 1975-08-19   M     Hunter       &lt;NA&gt;       &lt;NA&gt; 8.926435</span></span>
@@ -382,7 +397,7 @@ of the follow-up time).</p>
 <p>Here is an example of calculating the doses to organs Thyroid and
 Colon.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>doses_row <span class="ot">&lt;-</span> <span class="fu">calculate_dose</span>(dose_data, <span class="at">organ.ls =</span> <span class="fu">c</span>(<span class="st">&quot;Thyroid&quot;</span>, <span class="st">&quot;Colon&quot;</span>))</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(doses_row, <span class="at">nrow=</span><span class="dv">10</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(doses_row, <span class="at">nrow =</span> <span class="dv">10</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        id year date_birth sex  household event_type date_event   cesium</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:   1 1986 1975-08-19   M     Hunter       &lt;NA&gt;       &lt;NA&gt; 8.926435</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:   1 1987 1975-08-19   M     Hunter       &lt;NA&gt;       &lt;NA&gt; 8.926435</span></span>
@@ -395,47 +410,275 @@ Colon.</p>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323: 100 2018 1940-12-23   W Non-hunter       &lt;NA&gt;       &lt;NA&gt; 3.498142</span></span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324: 100 2019 1940-12-23   W Non-hunter       &lt;NA&gt;       &lt;NA&gt; 3.498142</span></span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325: 100 2020 1940-12-23   W Non-hunter       &lt;NA&gt;       &lt;NA&gt; 3.498142</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       municipality county start_date  stop_date   Dext_Colon Dext_Thyroid</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:          382      3 1986-04-28 1987-01-01 0.2588974827 0.2774105858</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:          382      3 1987-01-01 1988-01-01 0.1456357106 0.1567785599</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:          382      3 1988-01-01 1989-01-01 0.0875104922 0.0945929423</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:          382      3 1989-01-01 1989-06-30 0.0325678282 0.0352851780</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:          484      4 1989-06-30 1990-01-01 0.0227989723 0.0247291995</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                    </span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:          483      4 2016-01-01 2017-01-01 0.0004642009 0.0005340277</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:          483      4 2017-01-01 2018-01-01 0.0004082361 0.0004696445</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:          483      4 2018-01-01 2019-01-01 0.0003600654 0.0004142278</span></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:          483      4 2019-01-01 2020-01-01 0.0003175787 0.0003653501</span></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:          483      4 2020-01-01 2021-01-01 0.0002808254 0.0003230683</span></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dint_Thyroid  Dint_Colon Dmilk_Thyroid Dinh_Thyroid Dtot_Thyroid</span></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:  0.112119291 0.142832246    0.07613522    0.6744347  1.140099796</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:  0.286172504 0.368763817    0.00000000    0.0000000  0.442951064</span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:  0.241146891 0.315195300    0.00000000    0.0000000  0.335739834</span></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:  0.093322637 0.123254208    0.00000000    0.0000000  0.128607815</span></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:  0.027059317 0.035962142    0.00000000    0.0000000  0.051788517</span></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                 </span></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:  0.001276108 0.001693549    0.00000000    0.0000000  0.001810136</span></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:  0.001215084 0.001612567    0.00000000    0.0000000  0.001684729</span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:  0.001160230 0.001539771    0.00000000    0.0000000  0.001574458</span></span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:  0.001107857 0.001470267    0.00000000    0.0000000  0.001473207</span></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:  0.001060683 0.001407663    0.00000000    0.0000000  0.001383751</span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        Dtot_Colon</span></span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1: 0.401729728</span></span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2: 0.514399528</span></span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3: 0.402705792</span></span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4: 0.155822037</span></span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5: 0.058761115</span></span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---            </span></span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321: 0.002157750</span></span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322: 0.002020803</span></span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323: 0.001899836</span></span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324: 0.001787846</span></span>
-<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325: 0.001688489</span></span></code></pre></div>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       municipality county start_date  stop_date      age age_middle</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:          382      3 1986-04-28 1987-01-01 10.69131   11.03080</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:          382      3 1987-01-01 1988-01-01 11.37029   11.86995</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:          382      3 1988-01-01 1989-01-01 12.36961   12.87064</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:          382      3 1989-01-01 1989-06-30 13.37166   13.61807</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:          484      4 1989-06-30 1990-01-01 13.86448   14.11773</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                              </span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:          483      4 2016-01-01 2017-01-01 75.02259   75.52361</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:          483      4 2017-01-01 2018-01-01 76.02464   76.52430</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:          483      4 2018-01-01 2019-01-01 77.02396   77.52361</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:          483      4 2019-01-01 2020-01-01 78.02327   78.52293</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:          483      4 2020-01-01 2021-01-01 79.02259   79.52361</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dext_Adrenals   Dext_Brain   Dext_Colon      Dext_ET Dext_Endost-BS</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:  0.2861619632 0.2943902043 0.3126881117 0.3171890392   0.3318388955</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:  0.1608260947 0.1664369691 0.1755291698 0.1791977239   0.1882422661</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:  0.0964049781 0.1005284136 0.1049945279 0.1080876693   0.1140195171</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:  0.0357811950 0.0375466566 0.0388840696 0.0403125460   0.0426443366</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:  0.0249948699 0.0263416134 0.0271158937 0.0282505029   0.0299329290</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                    </span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:  0.0004731098 0.0005455681 0.0005114701 0.0005583549   0.0006095019</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:  0.0004160710 0.0004797936 0.0004498065 0.0004910387   0.0005360194</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:  0.0003669758 0.0004231793 0.0003967306 0.0004330976   0.0004727706</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:  0.0003236737 0.0003732453 0.0003499175 0.0003819933   0.0004169850</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:  0.0002862150 0.0003300498 0.0003094217 0.0003377853   0.0003687275</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dext_Female_breast Dext_GB-wall Dext_Ht-wall Dext_Kidneys   Dext_Liver</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:                 NA 0.2912135581 0.2643065265 0.2926343282 0.2842590311</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:                 NA 0.1632983169 0.1479457126 0.1637345545 0.1595699077</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:                 NA 0.0975839461 0.0884714202 0.0976966360 0.0955241543</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:                 NA 0.0361201959 0.0328304792 0.0361473616 0.0354186087</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:                 NA 0.0251824323 0.0229507366 0.0252048752 0.0247256636</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                       </span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:       0.0005626171 0.0004858966 0.0005072079 0.0004986833 0.0005072079</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:       0.0004947871 0.0004273162 0.0004460581 0.0004385613 0.0004460581</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:       0.0004364036 0.0003768941 0.0003934245 0.0003868123 0.0003934245</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:       0.0003849092 0.0003324216 0.0003470015 0.0003411696 0.0003470015</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:       0.0003403638 0.0002939506 0.0003068431 0.0003016861 0.0003068431</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         Dext_Lungs   Dext_Lymph Dext_Male_breast  Dext_Muscle Dext_O-mucosa</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1: 0.2852344662 0.3082326026       0.31150179 0.3417460494  0.3205486544</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2: 0.1599901996 0.1725487697       0.17646021 0.1921873822  0.1804380256</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3: 0.0957593229 0.1029827519       0.10677072 0.1153130192  0.1083469757</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4: 0.0355203874 0.0381018704       0.03990882 0.0428362177  0.0402626740</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5: 0.0248103786 0.0265638160       0.02800179 0.0299422885  0.0281463234</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                      </span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321: 0.0005370436 0.0005370436               NA 0.0005839284  0.0005583549</span></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322: 0.0004722968 0.0004722968               NA 0.0005135291  0.0004910387</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323: 0.0004165671 0.0004165671               NA 0.0004529341  0.0004330976</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324: 0.0003674134 0.0003674134               NA 0.0003994891  0.0003819933</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325: 0.0003248927 0.0003248927               NA 0.0003532564  0.0003377853</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dext_Oesophagus Dext_Ovaries Dext_Pancreas Dext_Prostate Dext_R-marrow</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:    0.2665455808           NA  0.2814915992     0.3304959  0.3000449121</span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:    0.1491605986           NA  0.1573276659     0.1847605  0.1686403101</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:    0.0891577924           NA  0.0937646393     0.1099588  0.1010245581</span></span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:    0.0330702674           NA  0.0346644837     0.0405576  0.0374580891</span></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:    0.0231103381           NA  0.0241592789     0.0282057  0.0261421008</span></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                       </span></span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:    0.0004901588 0.0004901588  0.0004944211            NA  0.0005114701</span></span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:    0.0004310646 0.0004310646  0.0004348129            NA  0.0004498065</span></span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:    0.0003802001 0.0003802001  0.0003835062            NA  0.0003967306</span></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:    0.0003353376 0.0003353376  0.0003382536            NA  0.0003499175</span></span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:    0.0002965291 0.0002965291  0.0002991076            NA  0.0003094217</span></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dext_Remainder Dext_Residual Dext_S-glands Dext_SI-stem    Dext_Skin</span></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:   0.2999779396  0.3126881117  0.3209905227 0.3008990116 0.3515204183</span></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:   0.1683068570  0.1755291698  0.1809539551 0.1686969947 0.1986228737</span></span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:   0.1007179919  0.1049945279  0.1089421686 0.1007788112 0.1198124056</span></span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:   0.0373404906  0.0388840696  0.0405911878 0.0372915569 0.0446843551</span></span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:   0.0260679221  0.0271158937  0.0284342182 0.0259931584 0.0313125149</span></span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                     </span></span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:   0.0005163881  0.0005114701  0.0005754039 0.0005029456 0.0006393376</span></span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:   0.0004541316  0.0004498065  0.0005060323 0.0004423097 0.0005622581</span></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:   0.0004005453  0.0003967306  0.0004463219 0.0003901184 0.0004959132</span></span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:   0.0003532821  0.0003499175  0.0003936572 0.0003440855 0.0004373969</span></span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:   0.0003123969  0.0003094217  0.0003480994 0.0003042646 0.0003867771</span></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        Dext_Spleen Dext_St-stem Dext_Testes  Dext_Thymus Dext_Thyroid</span></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1: 0.2938270605 0.2922043027  0.33115806 0.2709669429 0.3005667661</span></span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2: 0.1647901098 0.1642001250  0.18620764 0.1522373204 0.1698804636</span></span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3: 0.0985309237 0.0983260498  0.11187946 0.0914133049 0.1025071718</span></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4: 0.0364964124 0.0364424781  0.04165022 0.0340237860 0.0382392809</span></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5: 0.0254600196 0.0254249796  0.02917052 0.0238289822 0.0268000823</span></span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                </span></span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321: 0.0005199946 0.0005285191          NA 0.0005114701 0.0005327814</span></span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322: 0.0004573033 0.0004648000          NA 0.0004498065 0.0004685484</span></span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323: 0.0004033428 0.0004099549          NA 0.0003967306 0.0004132610</span></span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324: 0.0003557494 0.0003615814          NA 0.0003499175 0.0003644974</span></span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325: 0.0003145787 0.0003197357          NA 0.0003094217 0.0003223142</span></span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dext_Total_body Dext_UB-wall  Dext_Uterus Dint_Adrenals   Dint_Brain</span></span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:    0.3126881117 0.3079028583           NA            NA 0.0900948467</span></span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:    0.1755291698 0.1721295583           NA            NA 0.2341090589</span></span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:    0.1049945279 0.1025651107           NA            NA 0.2016756828</span></span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:    0.0388840696 0.0378987563           NA            NA 0.0793080552</span></span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:    0.0271158937 0.0263998249           NA            NA 0.0232171876</span></span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                     </span></span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:    0.0005114701 0.0005327814 0.0004816343            NA 0.0009597006</span></span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:    0.0004498065 0.0004685484 0.0004235678            NA 0.0009138128</span></span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:    0.0003967306 0.0004132610 0.0003735880            NA 0.0008725627</span></span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:    0.0003499175 0.0003644974 0.0003295056            NA 0.0008331776</span></span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:    0.0003094217 0.0003223142 0.0002913721            NA 0.0007977019</span></span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        Dint_Colon Dint_ET Dint_Endost-BS Dint_Female_breast Dint_GB-wall</span></span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1: 0.148202955      NA    0.228974342                 NA           NA</span></span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2: 0.382462325      NA    0.592442615                 NA           NA</span></span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3: 0.326728288      NA    0.507720023                 NA           NA</span></span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4: 0.127714485      NA    0.198917260                 NA           NA</span></span>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5: 0.037254905      NA    0.058104239                 NA           NA</span></span>
+<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                   </span></span>
+<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321: 0.001718419      NA    0.002442871       0.0008023686           NA</span></span>
+<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322: 0.001636247      NA    0.002326060       0.0007640000           NA</span></span>
+<span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323: 0.001562382      NA    0.002221056       0.0007295101           NA</span></span>
+<span id="cb3-121"><a href="#cb3-121" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324: 0.001491858      NA    0.002120801       0.0006965803           NA</span></span>
+<span id="cb3-122"><a href="#cb3-122" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325: 0.001428334      NA    0.002030498       0.0006669195           NA</span></span>
+<span id="cb3-123"><a href="#cb3-123" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dint_Ht-wall Dint_Kidneys  Dint_Liver  Dint_Lungs Dint_Lymph</span></span>
+<span id="cb3-124"><a href="#cb3-124" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:           NA  0.169201349 0.153554677 0.175361586         NA</span></span>
+<span id="cb3-125"><a href="#cb3-125" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:           NA  0.436892048 0.396493768 0.455657734         NA</span></span>
+<span id="cb3-126"><a href="#cb3-126" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:           NA  0.373477770 0.338946115 0.392515813         NA</span></span>
+<span id="cb3-127"><a href="#cb3-127" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:           NA  0.146059402 0.132555599 0.154350797         NA</span></span>
+<span id="cb3-128"><a href="#cb3-128" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:           NA  0.042618561 0.038678438 0.045184978         NA</span></span>
+<span id="cb3-129"><a href="#cb3-129" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                             </span></span>
+<span id="cb3-130"><a href="#cb3-130" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:           NA  0.001923030 0.001742030 0.002020761         NA</span></span>
+<span id="cb3-131"><a href="#cb3-131" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:           NA  0.001831076 0.001658733 0.001924138         NA</span></span>
+<span id="cb3-132"><a href="#cb3-132" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:           NA  0.001748417 0.001583855 0.001837281         NA</span></span>
+<span id="cb3-133"><a href="#cb3-133" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:           NA  0.001669496 0.001512362 0.001754351         NA</span></span>
+<span id="cb3-134"><a href="#cb3-134" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:           NA  0.001598409 0.001447967 0.001679653         NA</span></span>
+<span id="cb3-135"><a href="#cb3-135" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dint_Male_breast Dint_Muscle Dint_O-mucosa Dint_Oesophagus Dint_Ovaries</span></span>
+<span id="cb3-136"><a href="#cb3-136" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:       0.07619240          NA            NA     0.115592803           NA</span></span>
+<span id="cb3-137"><a href="#cb3-137" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:       0.19548779          NA            NA     0.294529458           NA</span></span>
+<span id="cb3-138"><a href="#cb3-138" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:       0.16580600          NA            NA     0.247649637           NA</span></span>
+<span id="cb3-139"><a href="#cb3-139" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:       0.06447423          NA            NA     0.095684672           NA</span></span>
+<span id="cb3-140"><a href="#cb3-140" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:       0.01874873          NA            NA     0.027717058           NA</span></span>
+<span id="cb3-141"><a href="#cb3-141" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                        </span></span>
+<span id="cb3-142"><a href="#cb3-142" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:               NA          NA            NA     0.001247205  0.001471112</span></span>
+<span id="cb3-143"><a href="#cb3-143" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:               NA          NA            NA     0.001187562  0.001400759</span></span>
+<span id="cb3-144"><a href="#cb3-144" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:               NA          NA            NA     0.001133948  0.001337520</span></span>
+<span id="cb3-145"><a href="#cb3-145" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:               NA          NA            NA     0.001082761  0.001277143</span></span>
+<span id="cb3-146"><a href="#cb3-146" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:               NA          NA            NA     0.001036655  0.001222760</span></span>
+<span id="cb3-147"><a href="#cb3-147" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dint_Pancreas Dint_Prostate Dint_R-marrow Dint_Remainder Dint_Residual</span></span>
+<span id="cb3-148"><a href="#cb3-148" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:            NA    0.15019372   0.210644162    0.145276838   0.195449710</span></span>
+<span id="cb3-149"><a href="#cb3-149" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:            NA    0.38200856   0.546584553    0.374397173   0.509920375</span></span>
+<span id="cb3-150"><a href="#cb3-150" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:            NA    0.32047880   0.470060582    0.319299738   0.441410176</span></span>
+<span id="cb3-151"><a href="#cb3-151" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:            NA    0.12361534   0.184624949    0.124658539   0.174180500</span></span>
+<span id="cb3-152"><a href="#cb3-152" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:            NA    0.03577108   0.054009610    0.036336997   0.051094179</span></span>
+<span id="cb3-153"><a href="#cb3-153" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                       </span></span>
+<span id="cb3-154"><a href="#cb3-154" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:            NA            NA   0.002333561    0.001696165   0.002277059</span></span>
+<span id="cb3-155"><a href="#cb3-155" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:            NA            NA   0.002221980    0.001615059   0.002168185</span></span>
+<span id="cb3-156"><a href="#cb3-156" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:            NA            NA   0.002121676    0.001542151   0.002070314</span></span>
+<span id="cb3-157"><a href="#cb3-157" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:            NA            NA   0.002025908    0.001472541   0.001976867</span></span>
+<span id="cb3-158"><a href="#cb3-158" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:            NA            NA   0.001939646    0.001409840   0.001892695</span></span>
+<span id="cb3-159"><a href="#cb3-159" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dint_S-glands Dint_SI-stem    Dint_Skin Dint_Spleen Dint_St-stem</span></span>
+<span id="cb3-160"><a href="#cb3-160" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:  0.0938210809           NA 0.0742374038          NA  0.137369996</span></span>
+<span id="cb3-161"><a href="#cb3-161" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:  0.2406453541           NA 0.1898268832          NA  0.355066088</span></span>
+<span id="cb3-162"><a href="#cb3-162" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:  0.2040305666           NA 0.1603245100          NA  0.303911460</span></span>
+<span id="cb3-163"><a href="#cb3-163" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:  0.0793162091           NA 0.0621491854          NA  0.118961531</span></span>
+<span id="cb3-164"><a href="#cb3-164" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:  0.0230608802           NA 0.0180387772          NA  0.034730481</span></span>
+<span id="cb3-165"><a href="#cb3-165" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                 </span></span>
+<span id="cb3-166"><a href="#cb3-166" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:  0.0009426426           NA 0.0007252662          NA  0.001540355</span></span>
+<span id="cb3-167"><a href="#cb3-167" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:  0.0008975661           NA 0.0006905842          NA  0.001466700</span></span>
+<span id="cb3-168"><a href="#cb3-168" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:  0.0008570464           NA 0.0006594084          NA  0.001400490</span></span>
+<span id="cb3-169"><a href="#cb3-169" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:  0.0008183596           NA 0.0006296428          NA  0.001337274</span></span>
+<span id="cb3-170"><a href="#cb3-170" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:  0.0007835133           NA 0.0006028321          NA  0.001280333</span></span>
+<span id="cb3-171"><a href="#cb3-171" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dint_Testes Dint_Thymus Dint_Thyroid Dint_Total_body Dint_UB-wall</span></span>
+<span id="cb3-172"><a href="#cb3-172" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:  0.11533107          NA  0.112117954     0.186788762  0.133002049</span></span>
+<span id="cb3-173"><a href="#cb3-173" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:  0.29411489          NA  0.286170850     0.486734244  0.338520865</span></span>
+<span id="cb3-174"><a href="#cb3-174" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:  0.24756899          NA  0.241147359     0.420727296  0.284249089</span></span>
+<span id="cb3-175"><a href="#cb3-175" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:  0.09573043          NA  0.093323352     0.165848405  0.109713712</span></span>
+<span id="cb3-176"><a href="#cb3-176" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:  0.02774385          NA  0.027059618     0.048620640  0.031761166</span></span>
+<span id="cb3-177"><a href="#cb3-177" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                  </span></span>
+<span id="cb3-178"><a href="#cb3-178" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:          NA          NA  0.001276084     0.002160485  0.001272076</span></span>
+<span id="cb3-179"><a href="#cb3-179" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:          NA          NA  0.001215062     0.002057184  0.001211243</span></span>
+<span id="cb3-180"><a href="#cb3-180" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:          NA          NA  0.001160208     0.001964322  0.001156561</span></span>
+<span id="cb3-181"><a href="#cb3-181" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:          NA          NA  0.001107836     0.001875659  0.001104353</span></span>
+<span id="cb3-182"><a href="#cb3-182" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:          NA          NA  0.001060663     0.001795796  0.001057328</span></span>
+<span id="cb3-183"><a href="#cb3-183" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dint_Uterus Dmilk_Thyroid Dinh_Thyroid Dtot_Adrenals  Dtot_Brain</span></span>
+<span id="cb3-184"><a href="#cb3-184" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:          NA    0.07613522    0.6744347            NA 0.384485051</span></span>
+<span id="cb3-185"><a href="#cb3-185" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:          NA    0.00000000    0.0000000            NA 0.400546028</span></span>
+<span id="cb3-186"><a href="#cb3-186" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:          NA    0.00000000    0.0000000            NA 0.302204096</span></span>
+<span id="cb3-187"><a href="#cb3-187" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:          NA    0.00000000    0.0000000            NA 0.116854712</span></span>
+<span id="cb3-188"><a href="#cb3-188" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:          NA    0.00000000    0.0000000            NA 0.049558801</span></span>
+<span id="cb3-189"><a href="#cb3-189" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                 </span></span>
+<span id="cb3-190"><a href="#cb3-190" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321: 0.001374196    0.00000000    0.0000000            NA 0.001505269</span></span>
+<span id="cb3-191"><a href="#cb3-191" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322: 0.001308479    0.00000000    0.0000000            NA 0.001393606</span></span>
+<span id="cb3-192"><a href="#cb3-192" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323: 0.001249406    0.00000000    0.0000000            NA 0.001295742</span></span>
+<span id="cb3-193"><a href="#cb3-193" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324: 0.001193006    0.00000000    0.0000000            NA 0.001206423</span></span>
+<span id="cb3-194"><a href="#cb3-194" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325: 0.001142206    0.00000000    0.0000000            NA 0.001127752</span></span>
+<span id="cb3-195"><a href="#cb3-195" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        Dtot_Colon Dtot_ET Dtot_Endost-BS Dtot_Female_breast Dtot_GB-wall</span></span>
+<span id="cb3-196"><a href="#cb3-196" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1: 0.460891067      NA    0.560813238                 NA           NA</span></span>
+<span id="cb3-197"><a href="#cb3-197" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2: 0.557991494      NA    0.780684881                 NA           NA</span></span>
+<span id="cb3-198"><a href="#cb3-198" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3: 0.431722816      NA    0.621739540                 NA           NA</span></span>
+<span id="cb3-199"><a href="#cb3-199" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4: 0.166598555      NA    0.241561597                 NA           NA</span></span>
+<span id="cb3-200"><a href="#cb3-200" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5: 0.064370798      NA    0.088037168                 NA           NA</span></span>
+<span id="cb3-201"><a href="#cb3-201" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                   </span></span>
+<span id="cb3-202"><a href="#cb3-202" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321: 0.002229889      NA    0.003052372        0.001364986           NA</span></span>
+<span id="cb3-203"><a href="#cb3-203" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322: 0.002086054      NA    0.002862079        0.001258787           NA</span></span>
+<span id="cb3-204"><a href="#cb3-204" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323: 0.001959113      NA    0.002693827        0.001165914           NA</span></span>
+<span id="cb3-205"><a href="#cb3-205" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324: 0.001841775      NA    0.002537786        0.001081490           NA</span></span>
+<span id="cb3-206"><a href="#cb3-206" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325: 0.001737756      NA    0.002399225        0.001007283           NA</span></span>
+<span id="cb3-207"><a href="#cb3-207" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dtot_Ht-wall Dtot_Kidneys  Dtot_Liver  Dtot_Lungs Dtot_Lymph</span></span>
+<span id="cb3-208"><a href="#cb3-208" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:           NA  0.461835677 0.437813708 0.460596052         NA</span></span>
+<span id="cb3-209"><a href="#cb3-209" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:           NA  0.600626602 0.556063676 0.615647934         NA</span></span>
+<span id="cb3-210"><a href="#cb3-210" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:           NA  0.471174406 0.434470269 0.488275136         NA</span></span>
+<span id="cb3-211"><a href="#cb3-211" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:           NA  0.182206764 0.167974208 0.189871184         NA</span></span>
+<span id="cb3-212"><a href="#cb3-212" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:           NA  0.067823436 0.063404101 0.069995356         NA</span></span>
+<span id="cb3-213"><a href="#cb3-213" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                             </span></span>
+<span id="cb3-214"><a href="#cb3-214" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:           NA  0.002421714 0.002249238 0.002557805         NA</span></span>
+<span id="cb3-215"><a href="#cb3-215" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:           NA  0.002269637 0.002104791 0.002396435         NA</span></span>
+<span id="cb3-216"><a href="#cb3-216" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:           NA  0.002135229 0.001977279 0.002253848         NA</span></span>
+<span id="cb3-217"><a href="#cb3-217" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:           NA  0.002010665 0.001859364 0.002121765         NA</span></span>
+<span id="cb3-218"><a href="#cb3-218" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:           NA  0.001900095 0.001754810 0.002004546         NA</span></span>
+<span id="cb3-219"><a href="#cb3-219" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dtot_Male_breast Dtot_Muscle Dtot_O-mucosa Dtot_Oesophagus Dtot_Ovaries</span></span>
+<span id="cb3-220"><a href="#cb3-220" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:       0.38769419          NA            NA     0.382138383           NA</span></span>
+<span id="cb3-221"><a href="#cb3-221" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:       0.37194800          NA            NA     0.443690056           NA</span></span>
+<span id="cb3-222"><a href="#cb3-222" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:       0.27257672          NA            NA     0.336807430           NA</span></span>
+<span id="cb3-223"><a href="#cb3-223" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:       0.10438305          NA            NA     0.128754940           NA</span></span>
+<span id="cb3-224"><a href="#cb3-224" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:       0.04675052          NA            NA     0.050827396           NA</span></span>
+<span id="cb3-225"><a href="#cb3-225" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                        </span></span>
+<span id="cb3-226"><a href="#cb3-226" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:               NA          NA            NA     0.001737364  0.001961271</span></span>
+<span id="cb3-227"><a href="#cb3-227" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:               NA          NA            NA     0.001618626  0.001831824</span></span>
+<span id="cb3-228"><a href="#cb3-228" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:               NA          NA            NA     0.001514149  0.001717721</span></span>
+<span id="cb3-229"><a href="#cb3-229" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:               NA          NA            NA     0.001418099  0.001612480</span></span>
+<span id="cb3-230"><a href="#cb3-230" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:               NA          NA            NA     0.001333185  0.001519289</span></span>
+<span id="cb3-231"><a href="#cb3-231" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dtot_Pancreas Dtot_Prostate Dtot_R-marrow Dtot_Remainder Dtot_Residual</span></span>
+<span id="cb3-232"><a href="#cb3-232" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:            NA    0.48068960   0.510689074    0.445254777   0.508137822</span></span>
+<span id="cb3-233"><a href="#cb3-233" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:            NA    0.56676903   0.715224863    0.542704030   0.685449545</span></span>
+<span id="cb3-234"><a href="#cb3-234" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:            NA    0.43043762   0.571085140    0.420017730   0.546404704</span></span>
+<span id="cb3-235"><a href="#cb3-235" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:            NA    0.16417294   0.222083038    0.161999030   0.213064569</span></span>
+<span id="cb3-236"><a href="#cb3-236" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:            NA    0.06397678   0.080151711    0.062404919   0.078210072</span></span>
+<span id="cb3-237"><a href="#cb3-237" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                       </span></span>
+<span id="cb3-238"><a href="#cb3-238" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:            NA            NA   0.002845032    0.002212553   0.002788529</span></span>
+<span id="cb3-239"><a href="#cb3-239" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:            NA            NA   0.002671786    0.002069190   0.002617991</span></span>
+<span id="cb3-240"><a href="#cb3-240" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:            NA            NA   0.002518407    0.001942697   0.002467044</span></span>
+<span id="cb3-241"><a href="#cb3-241" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:            NA            NA   0.002375825    0.001825823   0.002326784</span></span>
+<span id="cb3-242"><a href="#cb3-242" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:            NA            NA   0.002249068    0.001722237   0.002202117</span></span>
+<span id="cb3-243"><a href="#cb3-243" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dtot_S-glands Dtot_SI-stem    Dtot_Skin Dtot_Spleen Dtot_St-stem</span></span>
+<span id="cb3-244"><a href="#cb3-244" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:   0.414811604           NA 0.4257578220          NA  0.429574298</span></span>
+<span id="cb3-245"><a href="#cb3-245" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:   0.421599309           NA 0.3884497569          NA  0.519266213</span></span>
+<span id="cb3-246"><a href="#cb3-246" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:   0.312972735           NA 0.2801369156          NA  0.402237510</span></span>
+<span id="cb3-247"><a href="#cb3-247" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:   0.119907397           NA 0.1068335405          NA  0.155404009</span></span>
+<span id="cb3-248"><a href="#cb3-248" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:   0.051495098           NA 0.0493512921          NA  0.060155461</span></span>
+<span id="cb3-249"><a href="#cb3-249" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                 </span></span>
+<span id="cb3-250"><a href="#cb3-250" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:   0.001518046           NA 0.0013646038          NA  0.002068874</span></span>
+<span id="cb3-251"><a href="#cb3-251" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:   0.001403598           NA 0.0012528423          NA  0.001931500</span></span>
+<span id="cb3-252"><a href="#cb3-252" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:   0.001303368           NA 0.0011553216          NA  0.001810445</span></span>
+<span id="cb3-253"><a href="#cb3-253" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:   0.001212017           NA 0.0010670397          NA  0.001698855</span></span>
+<span id="cb3-254"><a href="#cb3-254" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:   0.001131613           NA 0.0009896092          NA  0.001600069</span></span>
+<span id="cb3-255"><a href="#cb3-255" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dtot_Testes Dtot_Thymus Dtot_Thyroid Dtot_Total_body Dtot_UB-wall</span></span>
+<span id="cb3-256"><a href="#cb3-256" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:  0.44648913          NA  1.163254640     0.499476874  0.440904907</span></span>
+<span id="cb3-257"><a href="#cb3-257" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:  0.48032253          NA  0.456051314     0.662263413  0.510650423</span></span>
+<span id="cb3-258"><a href="#cb3-258" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:  0.35944845          NA  0.343654531     0.525721824  0.386814200</span></span>
+<span id="cb3-259"><a href="#cb3-259" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:  0.13738065          NA  0.131562632     0.204732474  0.147612469</span></span>
+<span id="cb3-260"><a href="#cb3-260" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:  0.05691437          NA  0.053859701     0.075736533  0.058160991</span></span>
+<span id="cb3-261"><a href="#cb3-261" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---                                                                  </span></span>
+<span id="cb3-262"><a href="#cb3-262" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321:          NA          NA  0.001808866     0.002671955  0.001804857</span></span>
+<span id="cb3-263"><a href="#cb3-263" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322:          NA          NA  0.001683610     0.002506990  0.001679791</span></span>
+<span id="cb3-264"><a href="#cb3-264" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323:          NA          NA  0.001573469     0.002361053  0.001569822</span></span>
+<span id="cb3-265"><a href="#cb3-265" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324:          NA          NA  0.001472334     0.002225577  0.001468850</span></span>
+<span id="cb3-266"><a href="#cb3-266" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325:          NA          NA  0.001382978     0.002105218  0.001379642</span></span>
+<span id="cb3-267"><a href="#cb3-267" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Dtot_Uterus</span></span>
+<span id="cb3-268"><a href="#cb3-268" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1:          NA</span></span>
+<span id="cb3-269"><a href="#cb3-269" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2:          NA</span></span>
+<span id="cb3-270"><a href="#cb3-270" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3:          NA</span></span>
+<span id="cb3-271"><a href="#cb3-271" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4:          NA</span></span>
+<span id="cb3-272"><a href="#cb3-272" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5:          NA</span></span>
+<span id="cb3-273"><a href="#cb3-273" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ---            </span></span>
+<span id="cb3-274"><a href="#cb3-274" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2321: 0.001855830</span></span>
+<span id="cb3-275"><a href="#cb3-275" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2322: 0.001732047</span></span>
+<span id="cb3-276"><a href="#cb3-276" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2323: 0.001622994</span></span>
+<span id="cb3-277"><a href="#cb3-277" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2324: 0.001522512</span></span>
+<span id="cb3-278"><a href="#cb3-278" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2325: 0.001433578</span></span></code></pre></div>
 <p>The function <tt>dose_total_per_person()</tt> sums the above
 calculated absorbed doses for the follow-up period for each person (for
 each id) and for each organ.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>doses_tot <span class="ot">&lt;-</span> <span class="fu">dose_total_per_person</span>(doses_row)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(doses_tot, <span class="at">nrow=</span><span class="dv">10</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(doses_tot, <span class="at">nrow =</span> <span class="dv">10</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      id date_birth sex date_event event_type  household start_date  stop_date</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:   1 1975-08-19   M       &lt;NA&gt;       &lt;NA&gt;     Hunter 1986-04-28 2021-01-01</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:   2 1933-12-05   M 2001-11-30     Cancer Non-hunter 1986-04-28 2001-01-01</span></span>
@@ -448,30 +691,246 @@ each id) and for each organ.</p>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:  98 1931-06-22   W 1994-10-16     Cancer Non-hunter 1986-04-28 1994-01-01</span></span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:  99 1917-01-23   W 1992-04-30     Cancer Non-hunter 1986-04-28 1992-01-01</span></span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99: 100 1940-12-23   W       &lt;NA&gt;       &lt;NA&gt; Non-hunter 1986-04-28 2021-01-01</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dext_Colon Dext_Thyroid Dint_Thyroid Dint_Colon Dmilk_Thyroid Dinh_Thyroid</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1: 0.77820657   0.84102675   1.16357420 1.54459248    0.07613522    0.6744347</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2: 2.42601711   2.67551996   0.57633859 0.75842843    0.04644447    0.0820000</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3: 0.58619775   0.64648504   0.37900906 0.49076929    0.04644447    0.0820000</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4: 0.43058389   0.47486713   0.31740888 0.43671263    0.04292200    0.0240000</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5: 0.57585803   0.62800232   0.34148706 0.47073847    0.02546500    0.6818143</span></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                           </span></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95: 1.14063098   1.31220895   1.99218779 2.57392105    0.04644447    0.0820000</span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96: 1.66766031   1.91851599   0.28690073 0.37145122    0.04057368    0.3200000</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97: 0.59384274   0.68317078   0.42091664 0.53956019    0.04644447    0.0820000</span></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98: 0.33922163   0.39024861   0.06736433 0.08609731    0.05857744    0.3200000</span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99: 0.02020743   0.02324711   0.06640980 0.08664145    0.04292200    0.0240000</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dtot_Thyroid Dtot_Colon</span></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:    2.7551709  2.3227991</span></span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:    3.3803030  3.1844455</span></span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:    1.1539386  1.0769670</span></span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:    0.8591980  0.8672965</span></span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:    1.6767687  1.0465965</span></span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                        </span></span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:    3.4328412  3.7145520</span></span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:    2.5659904  2.0391115</span></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:    1.2325319  1.1334029</span></span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:    0.8361904  0.4253189</span></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:    0.1565789  0.1068489</span></span></code></pre></div>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dext_Adrenals Dext_Brain Dext_Colon    Dext_ET Dext_Endost-BS</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:    0.85250503 0.89806265 0.92240667 0.96130042     1.01400378</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:    2.59974720 2.92183977 2.71478026 3.05987945     3.26693896</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:    0.62817609 0.70600322 0.65597150 0.73935770     0.78938943</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:    0.46141853 0.51858543 0.48183528 0.54308553     0.57983568</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:    0.62234714 0.67814182 0.66172133 0.71787766     0.76278107</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                              </span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:    1.16252195 1.34056585 1.25678048 1.37198536     1.49766341</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:    1.69966601 1.95997521 1.83747676 2.00591213     2.18965981</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:    0.60523976 0.69793414 0.65431325 0.71429197     0.77972329</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:    0.34573197 0.39868191 0.37376429 0.40802601     0.44540244</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:    0.02059525 0.02374948 0.02226514 0.02430611     0.02653263</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dext_Female_breast Dext_GB-wall Dext_Ht-wall Dext_Kidneys Dext_Liver</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:                 NA   0.85826732    0.7924458   0.86413306  0.8440052</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:                 NA   2.53072736    2.5307274   2.59974720  2.5537340</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:                 NA   0.61149885    0.6114989   0.62817609  0.6170579</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:                 NA   0.44916848    0.4491685   0.46141853  0.4532518</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:                 NA   0.61602823    0.5909760   0.62577596  0.6135682</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                     </span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:         1.38245853   1.19394146    1.2463073   1.22536097  1.2463073</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:         2.02122444   1.74560292    1.8221645   1.79153984  1.8221645</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:         0.71974458   0.62159759    0.6488606   0.63795542  0.6488606</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:         0.41114072   0.35507607    0.3706496   0.36442018  0.3706496</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:         0.02449165   0.02115188    0.0220796   0.02170851  0.0220796</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dext_Lungs Dext_Lymph Dext_Male_breast Dext_Muscle Dext_O-mucosa</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:  0.8500580  0.9091588        0.9467029  1.02175774    0.95856386</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:  2.6227538  2.7147803        2.9908596  3.15190590    2.94484638</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:  0.6337352  0.6559715        0.7226805  0.76159402    0.71156230</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:  0.4655019  0.4818353        0.5308355  0.55941893    0.52266878</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:  0.6236897  0.6561223        0.7056373  0.75024409    0.70265807</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                 </span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:  1.3196195  1.3196195               NA  1.43482438    1.37198536</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:  1.9293506  1.9293506               NA  2.09778597    2.00591213</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:  0.6870289  0.6870289               NA  0.74700763    0.71429197</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:  0.3924525  0.3924525               NA  0.42671423    0.40802601</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:  0.0233784  0.0233784               NA  0.02541937    0.02430611</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dext_Oesophagus Dext_Ovaries Dext_Pancreas Dext_Prostate Dext_R-marrow</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:      0.79758716           NA    0.82928363     0.9609873    0.88882356</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:      2.53072736           NA    2.48471414     2.7147803    2.64576042</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:      0.61149885           NA    0.60038069     0.6559715    0.63929425</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:      0.44916848           NA    0.44100178     0.4818353    0.46958523</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:      0.59285324           NA    0.59913137     0.6752244    0.64136146</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                       </span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:      1.20441463   1.20441463    1.21488780            NA    1.25678048</span></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:      1.76091523   1.76091523    1.77622754            NA    1.83747676</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:      0.62705020   0.62705020    0.63250281            NA    0.65431325</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:      0.35819078   0.35819078    0.36130548            NA    0.37376429</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:      0.02133743   0.02133743    0.02152297            NA    0.02226514</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dext_Remainder Dext_Residual Dext_S-glands Dext_SI-stem  Dext_Skin</span></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:     0.89102333    0.92240667    0.97131853   0.88567332 1.06492629</span></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:     2.70770130    2.71478026    3.10589267   2.59974720 3.38197202</span></span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:     0.65426101    0.65597150    0.75047586   0.62817609 0.81718483</span></span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:     0.48057887    0.48183528    0.55125223   0.46141853 0.60025243</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:     0.64899493    0.66172133    0.72649338   0.63428794 0.79440170</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                   </span></span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:     1.26886491    1.25678048    1.41387804   1.23583414 1.57097560</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:     1.85514481    1.83747676    2.06716136   1.80685215 2.29684595</span></span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:     0.66060473    0.65431325    0.73610241   0.64340803 0.81789156</span></span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:     0.37735817    0.37376429    0.42048482   0.36753488 0.46720536</span></span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:     0.02247923    0.02226514    0.02504828   0.02189405 0.02783143</span></span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dext_Spleen Dext_St-stem Dext_Testes Dext_Thymus Dext_Thyroid</span></span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:  0.86906078   0.86396027   1.0020494  0.82016632   0.91127376</span></span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:  2.59974720   2.55373397   3.2439323  2.66876704   2.89883316</span></span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:  0.62817609   0.61705793   0.7838303  0.64485333   0.70044414</span></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:  0.46141853   0.45325183   0.5757523  0.47366858   0.51450208</span></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:  0.62812801   0.62128626   0.7534758  0.61813290   0.68040384</span></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                              </span></span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:  1.27772682   1.29867316          NA  1.25678048   1.30914633</span></span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:  1.86810138   1.89872599          NA  1.83747676   1.91403829</span></span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:  0.66521847   0.67612369          NA  0.65431325   0.68157630</span></span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:  0.37999369   0.38622310          NA  0.37376429   0.38933780</span></span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:  0.02263623   0.02300731          NA  0.02226514   0.02319285</span></span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dext_Total_body Dext_UB-wall Dext_Uterus Dint_Adrenals Dint_Brain</span></span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:      0.92240667   0.90418228          NA            NA 0.99656912</span></span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:      2.71478026   2.66876704          NA            NA 0.48705902</span></span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:      0.65597150   0.64485333          NA            NA 0.31240423</span></span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:      0.48183528   0.47366858          NA            NA 0.28704222</span></span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:      0.66172133   0.64860728          NA            NA 0.30970399</span></span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                  </span></span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:      1.25678048   1.30914633  1.18346829            NA 1.40110965</span></span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:      1.83747676   1.91403829  1.73029062            NA 0.20285163</span></span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:      0.65431325   0.68157630  0.61614498            NA 0.29010707</span></span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:      0.37376429   0.38933780  0.35196137            NA 0.04607532</span></span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:      0.02226514   0.02319285  0.02096634            NA 0.04787170</span></span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dint_Colon Dint_ET Dint_Endost-BS Dint_Female_breast Dint_GB-wall</span></span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1: 1.60018655      NA      2.4950789                 NA           NA</span></span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2: 0.78598039      NA      1.2232011                 NA           NA</span></span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3: 0.50890624      NA      0.7891666                 NA           NA</span></span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4: 0.45184269      NA      0.7099353                 NA           NA</span></span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5: 0.48701422      NA      0.7655017                 NA           NA</span></span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                  </span></span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95: 2.61520707      NA      3.6692409         1.23724159           NA</span></span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96: 0.37736973      NA      0.5300148         0.17834869           NA</span></span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97: 0.54843337      NA      0.7664401         0.26047123           NA</span></span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98: 0.08752636      NA      0.1221362         0.04163030           NA</span></span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99: 0.08798819      NA      0.1240479         0.04142805           NA</span></span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dint_Ht-wall Dint_Kidneys Dint_Liver Dint_Lungs Dint_Lymph Dint_Male_breast</span></span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:           NA   1.83046901 1.66123941 1.93951531         NA        0.8057740</span></span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:           NA   0.89872637 0.81563362 0.94793236         NA        0.3975106</span></span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:           NA   0.58146490 0.52769987 0.60803925         NA        0.2594796</span></span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:           NA   0.51771089 0.46985736 0.55858903         NA        0.2235185</span></span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:           NA   0.55805721 0.50647488 0.60268643         NA        0.2406912</span></span>
+<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                            </span></span>
+<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:           NA   2.89954941 2.59521124 2.96019216         NA               NA</span></span>
+<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:           NA   0.41870660 0.37511869 0.42845632         NA               NA</span></span>
+<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:           NA   0.60637001 0.54074029 0.61357509         NA               NA</span></span>
+<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:           NA   0.09667077 0.08608791 0.09748882         NA               NA</span></span>
+<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:           NA   0.09788783 0.08800397 0.10101262         NA               NA</span></span>
+<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dint_Muscle Dint_O-mucosa Dint_Oesophagus Dint_Ovaries Dint_Pancreas</span></span>
+<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:          NA            NA      1.19207702           NA            NA</span></span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:          NA            NA      0.59126040           NA            NA</span></span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:          NA            NA      0.38978926           NA            NA</span></span>
+<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:          NA            NA      0.32332240           NA            NA</span></span>
+<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:          NA            NA      0.34774043           NA            NA</span></span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                     </span></span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:          NA            NA      1.97794024   2.35929661            NA</span></span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:          NA            NA      0.28450755   0.33907614            NA</span></span>
+<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:          NA            NA      0.41978972   0.50230424            NA</span></span>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:          NA            NA      0.06729651   0.08061822            NA</span></span>
+<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:          NA            NA      0.06556433   0.07789519            NA</span></span>
+<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dint_Prostate Dint_R-marrow Dint_Remainder Dint_Residual Dint_S-glands</span></span>
+<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:     1.5387675     2.3186062     1.56097296     2.1923269    0.99113037</span></span>
+<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:     0.7643031     1.1343253     0.76749969     1.0684307    0.48906451</span></span>
+<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:     0.5051743     0.7289566     0.49788724     0.6815964    0.31937838</span></span>
+<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:     0.4148363     0.6651903     0.43896298     0.6384925    0.27467511</span></span>
+<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:     0.4460178     0.7175606     0.47302999     0.6892902    0.29576309</span></span>
+<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                       </span></span>
+<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:            NA     3.4654498     2.55125960     3.2733660    1.45596685</span></span>
+<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:            NA     0.5010327     0.36848337     0.4745187    0.20985085</span></span>
+<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:            NA     0.7213606     0.53314077     0.6744399    0.30666828</span></span>
+<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:            NA     0.1148007     0.08497245     0.1069129    0.04902281</span></span>
+<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:            NA     0.1176522     0.08620699     0.1124957    0.04872244</span></span>
+<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dint_SI-stem  Dint_Skin Dint_Spleen Dint_St-stem Dint_Testes Dint_Thymus</span></span>
+<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:           NA 0.77553485          NA   1.49152474   1.1931197          NA</span></span>
+<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:           NA 0.38359270          NA   0.73175743   0.5913764          NA</span></span>
+<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:           NA 0.25160268          NA   0.47276598   0.3893836          NA</span></span>
+<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:           NA 0.21281457          NA   0.42312946   0.3245343          NA</span></span>
+<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:           NA 0.22903185          NA   0.45617706   0.3490984          NA</span></span>
+<span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                         </span></span>
+<span id="cb4-154"><a href="#cb4-154" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:           NA 1.12434682          NA   2.31113411          NA          NA</span></span>
+<span id="cb4-155"><a href="#cb4-155" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:           NA 0.16200776          NA   0.33386776          NA          NA</span></span>
+<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:           NA 0.23707429          NA   0.48259625          NA          NA</span></span>
+<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:           NA 0.03791305          NA   0.07689457          NA          NA</span></span>
+<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:           NA 0.03757501          NA   0.07816499          NA          NA</span></span>
+<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dint_Thyroid Dint_Total_body Dint_UB-wall Dint_Uterus Dmilk_Thyroid</span></span>
+<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:   1.16358638       2.0864282   1.36616854          NA    0.07613522</span></span>
+<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:   0.57634185       1.0176835   0.67819217          NA    0.04644447</span></span>
+<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:   0.37900787       0.6502776   0.44780076          NA    0.04644447</span></span>
+<span id="cb4-163"><a href="#cb4-163" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:   0.31741863       0.6056531   0.36918850          NA    0.04292200</span></span>
+<span id="cb4-164"><a href="#cb4-164" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:   0.34149792       0.6537288   0.39699103          NA    0.02546500</span></span>
+<span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                    </span></span>
+<span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:   1.99204410       3.1201716   2.01753605  2.19875982    0.04644447</span></span>
+<span id="cb4-167"><a href="#cb4-167" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:   0.28688121       0.4521383   0.29020135  0.31605890    0.04057368</span></span>
+<span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:   0.42087977       0.6438290   0.42820257  0.46782194    0.04644447</span></span>
+<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:   0.06735804       0.1021188   0.06864572  0.07506593    0.05857744</span></span>
+<span id="cb4-170"><a href="#cb4-170" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:   0.06640629       0.1070434   0.06687504  0.07265454    0.04292200</span></span>
+<span id="cb4-171"><a href="#cb4-171" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dinh_Thyroid Dtot_Adrenals Dtot_Brain Dtot_Colon Dtot_ET Dtot_Endost-BS</span></span>
+<span id="cb4-172"><a href="#cb4-172" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:    0.6744347            NA 1.89463177  2.5225932      NA      3.5090827</span></span>
+<span id="cb4-173"><a href="#cb4-173" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:    0.0380000            NA 3.40889880  3.5007607      NA      4.4901401</span></span>
+<span id="cb4-174"><a href="#cb4-174" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:    0.0380000            NA 1.01840745  1.1648777      NA      1.5785560</span></span>
+<span id="cb4-175"><a href="#cb4-175" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:    0.0234000            NA 0.80562765  0.9336780      NA      1.2897710</span></span>
+<span id="cb4-176"><a href="#cb4-176" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:    0.4286908            NA 0.98784580  1.1487355      NA      1.5282827</span></span>
+<span id="cb4-177"><a href="#cb4-177" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                        </span></span>
+<span id="cb4-178"><a href="#cb4-178" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:    0.0380000            NA 2.74167549  3.8719876      NA      5.1669043</span></span>
+<span id="cb4-179"><a href="#cb4-179" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:    0.0824000            NA 2.16282685  2.2148465      NA      2.7196746</span></span>
+<span id="cb4-180"><a href="#cb4-180" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:    0.0380000            NA 0.98804121  1.2027466      NA      1.5461634</span></span>
+<span id="cb4-181"><a href="#cb4-181" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:    0.3200000            NA 0.44475722  0.4612906      NA      0.5675386</span></span>
+<span id="cb4-182"><a href="#cb4-182" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:    0.0234000            NA 0.07162118  0.1102533      NA      0.1505805</span></span>
+<span id="cb4-183"><a href="#cb4-183" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dtot_Female_breast Dtot_GB-wall Dtot_Ht-wall Dtot_Kidneys Dtot_Liver</span></span>
+<span id="cb4-184"><a href="#cb4-184" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:                 NA           NA           NA    2.6946021  2.5052446</span></span>
+<span id="cb4-185"><a href="#cb4-185" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:                 NA           NA           NA    3.4984736  3.3693676</span></span>
+<span id="cb4-186"><a href="#cb4-186" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:                 NA           NA           NA    1.2096410  1.1447578</span></span>
+<span id="cb4-187"><a href="#cb4-187" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:                 NA           NA           NA    0.9791294  0.9231092</span></span>
+<span id="cb4-188"><a href="#cb4-188" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:                 NA           NA           NA    1.1838332  1.1200431</span></span>
+<span id="cb4-189"><a href="#cb4-189" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                     </span></span>
+<span id="cb4-190"><a href="#cb4-190" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:         2.61970012           NA           NA    4.1249104  3.8415185</span></span>
+<span id="cb4-191"><a href="#cb4-191" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:         2.19957312           NA           NA    2.2102464  2.1972831</span></span>
+<span id="cb4-192"><a href="#cb4-192" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:         0.98021581           NA           NA    1.2443254  1.1896009</span></span>
+<span id="cb4-193"><a href="#cb4-193" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:         0.45277102           NA           NA    0.4610910  0.4567375</span></span>
+<span id="cb4-194"><a href="#cb4-194" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:         0.06591971           NA           NA    0.1195963  0.1100836</span></span>
+<span id="cb4-195"><a href="#cb4-195" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dtot_Lungs Dtot_Lymph Dtot_Male_breast Dtot_Muscle Dtot_O-mucosa</span></span>
+<span id="cb4-196"><a href="#cb4-196" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:  2.7895733         NA        1.7524769          NA            NA</span></span>
+<span id="cb4-197"><a href="#cb4-197" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:  3.5706862         NA        3.3883702          NA            NA</span></span>
+<span id="cb4-198"><a href="#cb4-198" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:  1.2417744         NA        0.9821600          NA            NA</span></span>
+<span id="cb4-199"><a href="#cb4-199" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:  1.0240909         NA        0.7543540          NA            NA</span></span>
+<span id="cb4-200"><a href="#cb4-200" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:  1.2263762         NA        0.9463285          NA            NA</span></span>
+<span id="cb4-201"><a href="#cb4-201" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                 </span></span>
+<span id="cb4-202"><a href="#cb4-202" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:  4.2798117         NA               NA          NA            NA</span></span>
+<span id="cb4-203"><a href="#cb4-203" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:  2.3578069         NA               NA          NA            NA</span></span>
+<span id="cb4-204"><a href="#cb4-204" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:  1.3006040         NA               NA          NA            NA</span></span>
+<span id="cb4-205"><a href="#cb4-205" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:  0.4899413         NA               NA          NA            NA</span></span>
+<span id="cb4-206"><a href="#cb4-206" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:  0.1243910         NA               NA          NA            NA</span></span>
+<span id="cb4-207"><a href="#cb4-207" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dtot_Oesophagus Dtot_Ovaries Dtot_Pancreas Dtot_Prostate Dtot_R-marrow</span></span>
+<span id="cb4-208"><a href="#cb4-208" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:      1.98966418           NA            NA     2.4997549     3.2074298</span></span>
+<span id="cb4-209"><a href="#cb4-209" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:      3.12198776           NA            NA     3.4790834     3.7800858</span></span>
+<span id="cb4-210"><a href="#cb4-210" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:      1.00128811           NA            NA     1.1611458     1.3682508</span></span>
+<span id="cb4-211"><a href="#cb4-211" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:      0.77249088           NA            NA     0.8966716     1.1347756</span></span>
+<span id="cb4-212"><a href="#cb4-212" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:      0.94059368           NA            NA     1.1212422     1.3589221</span></span>
+<span id="cb4-213"><a href="#cb4-213" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                       </span></span>
+<span id="cb4-214"><a href="#cb4-214" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:      3.18235487   3.56371124            NA            NA     4.7222303</span></span>
+<span id="cb4-215"><a href="#cb4-215" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:      2.04542278   2.09999137            NA            NA     2.3385095</span></span>
+<span id="cb4-216"><a href="#cb4-216" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:      1.04683992   1.12935444            NA            NA     1.3756738</span></span>
+<span id="cb4-217"><a href="#cb4-217" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:      0.42548728   0.43880899            NA            NA     0.4885650</span></span>
+<span id="cb4-218"><a href="#cb4-218" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:      0.08690176   0.09923261            NA            NA     0.1399174</span></span>
+<span id="cb4-219"><a href="#cb4-219" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dtot_Remainder Dtot_Residual Dtot_S-glands Dtot_SI-stem  Dtot_Skin</span></span>
+<span id="cb4-220"><a href="#cb4-220" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:      2.4519963     3.1147335    1.96244890           NA 1.84046115</span></span>
+<span id="cb4-221"><a href="#cb4-221" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:      3.4752010     3.7832110    3.59495718           NA 3.76556472</span></span>
+<span id="cb4-222"><a href="#cb4-222" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:      1.1521482     1.3375678    1.06985425           NA 1.06878751</span></span>
+<span id="cb4-223"><a href="#cb4-223" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:      0.9195418     1.1203278    0.82592734           NA 0.81306700</span></span>
+<span id="cb4-224"><a href="#cb4-224" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:      1.1220249     1.3510115    1.02225648           NA 1.02343355</span></span>
+<span id="cb4-225"><a href="#cb4-225" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                                   </span></span>
+<span id="cb4-226"><a href="#cb4-226" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:      3.8201245     4.5301465    2.86984489           NA 2.69532242</span></span>
+<span id="cb4-227"><a href="#cb4-227" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:      2.2236282     2.3119954    2.27701220           NA 2.45885371</span></span>
+<span id="cb4-228"><a href="#cb4-228" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:      1.1937455     1.3287532    1.04277068           NA 1.05496585</span></span>
+<span id="cb4-229"><a href="#cb4-229" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:      0.4623306     0.4806771    0.46950764           NA 0.50511841</span></span>
+<span id="cb4-230"><a href="#cb4-230" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:      0.1086862     0.1347609    0.07377072           NA 0.06540643</span></span>
+<span id="cb4-231"><a href="#cb4-231" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dtot_Spleen Dtot_St-stem Dtot_Testes Dtot_Thymus Dtot_Thyroid</span></span>
+<span id="cb4-232"><a href="#cb4-232" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:          NA    2.3554850   2.1951691          NA    2.8254301</span></span>
+<span id="cb4-233"><a href="#cb4-233" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:          NA    3.2854914   3.8353087          NA    3.5596195</span></span>
+<span id="cb4-234"><a href="#cb4-234" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:          NA    1.0898239   1.1732139          NA    1.1638965</span></span>
+<span id="cb4-235"><a href="#cb4-235" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:          NA    0.8763813   0.9002866          NA    0.8982427</span></span>
+<span id="cb4-236"><a href="#cb4-236" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:          NA    1.0774633   1.1025742          NA    1.4760575</span></span>
+<span id="cb4-237"><a href="#cb4-237" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                                              </span></span>
+<span id="cb4-238"><a href="#cb4-238" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:          NA    3.6098073          NA          NA    3.3856349</span></span>
+<span id="cb4-239"><a href="#cb4-239" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:          NA    2.2325937          NA          NA    2.3238932</span></span>
+<span id="cb4-240"><a href="#cb4-240" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:          NA    1.1587199          NA          NA    1.1869006</span></span>
+<span id="cb4-241"><a href="#cb4-241" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:          NA    0.4631177          NA          NA    0.8352733</span></span>
+<span id="cb4-242"><a href="#cb4-242" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:          NA    0.1011723          NA          NA    0.1559211</span></span>
+<span id="cb4-243"><a href="#cb4-243" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Dtot_Total_body Dtot_UB-wall Dtot_Uterus</span></span>
+<span id="cb4-244"><a href="#cb4-244" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:       3.0088349   2.27035082          NA</span></span>
+<span id="cb4-245"><a href="#cb4-245" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:       3.7324638   3.34695921          NA</span></span>
+<span id="cb4-246"><a href="#cb4-246" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:       1.3062491   1.09265409          NA</span></span>
+<span id="cb4-247"><a href="#cb4-247" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:       1.0874884   0.84285709          NA</span></span>
+<span id="cb4-248"><a href="#cb4-248" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:       1.3154502   1.04559832          NA</span></span>
+<span id="cb4-249"><a href="#cb4-249" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---                                         </span></span>
+<span id="cb4-250"><a href="#cb4-250" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95:       4.3769521   3.32668238  3.38222810</span></span>
+<span id="cb4-251"><a href="#cb4-251" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 96:       2.2896151   2.20423965  2.04634952</span></span>
+<span id="cb4-252"><a href="#cb4-252" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97:       1.2981422   1.10977887  1.08396691</span></span>
+<span id="cb4-253"><a href="#cb4-253" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 98:       0.4758831   0.45798352  0.42702730</span></span>
+<span id="cb4-254"><a href="#cb4-254" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 99:       0.1293085   0.09006789  0.09362088</span></span></code></pre></div>
 </div>
 
 

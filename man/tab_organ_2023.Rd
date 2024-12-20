@@ -2,16 +2,13 @@
 % Please edit documentation in R/data.R
 \docType{data}
 \encoding{UTF-8}
-\name{tab_organ}
-\alias{tab_organ}
+\name{tab_organ_2023}
+\alias{tab_organ_2023}
 \title{Cancer site dependent parameters}
 \format{
-A data set in data.table format with 33 rows and 17 variables:
+A data set in data.table format with 23 rows and 15 variables:
 \describe{
-\item{Organ}{names of the organs}
-\item{EPA_cancer_site}{organ/tissues included by EPA (2011) that are used
-for computation of lifetime attributable risk (LAR)}
-\item{ICRP_risk_organ}{organ/tissues included by ICRP that are used for computation of effective dose}
+\item{Organ}{names of the cancer sites}
 \item{k_SEQ_organ_f, k_SEQ_organ_m}{k_SEQ values for females and males, respectively}
 \item{a0_f, a1_f, a2_f, a3_f}{coefficients of the polynomial for females}
 \item{a0_m, a1_m, a2_m, a3_m}{coefficients of the polynomial for males}
@@ -24,13 +21,13 @@ females and males, respectively}
 }
 }
 \source{
-Tondel M, Gabrysch K, Rääf C, Isaksson M. (2025)
-A model for estimating radiation doses and population cancer risk in Sweden
-after the Chernobyl Nuclear Power Plant accident in 1986. Uppsala University.
-doi:10.33063/diva-544175.
+Tondel, M., Gabrysch, K., Rääf, C., Isaksson, M. (2023)
+Estimating the organ absorbed dose in Swedish inhabitants
+following the Chernobyl Nuclear Power Plant accident with the
+R package absorbedDose. Uppsala University. doi: 10.33063/diva-484911.
 }
 \usage{
-tab_organ
+tab_organ_2023
 }
 \description{
 A table with values of k_SEQ, coefficients of organ dependent polynomials,
@@ -38,5 +35,9 @@ A table with values of k_SEQ, coefficients of organ dependent polynomials,
 and
 \eqn{\epsilon}_Cs_137,
 per cancer site (organ) and per sex.
+}
+\details{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+Replaced with \code{\link{tab_organ}}.
 }
 \keyword{datasets}
