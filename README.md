@@ -9,11 +9,21 @@
 The package absorbedDose calculates the estimated organ absorbed dose
 following the Chernobyl Nuclear Power Plant accident.
 
-The details about the model can be found in Tondel, M., Gabrysch, K.,
-Rääf, C., Isaksson, M. (2022) Estimating the organ absorbed dose in
-Swedish inhabitants following the Chernobyl Nuclear Power Plant accident
-with the R package absorbedDose. Uppsala University. doi:
-10.33063/diva-484911.
+The details about the model to calculate the organ absorbed dose can be
+found in:
+
+Tondel, M., Gabrysch, K., Rääf, C., Isaksson, M. (2023) Estimating the
+organ absorbed dose in Swedish inhabitants following the Chernobyl
+Nuclear Power Plant accident with the R package absorbedDose. Uppsala
+University. <doi:10.33063/diva-484911>.
+
+The details about the model to calculate the number of attributable
+cancer cases and the effective dose can be found in:
+
+Tondel M, Gabrysch K, Rääf C, Isaksson M. (2025) A model for estimating
+radiation doses and population cancer risk in Sweden after the Chernobyl
+Nuclear Power Plant accident in 1986. Uppsala University.
+<doi:10.33063/diva-544175>.
 
 ## Installation
 
@@ -37,20 +47,22 @@ A data set to calculate the doses should look like the generated sample
 data set <code>dose_data</code>:
 
 ``` r
-print(dose_data, nrow=10)
-#>        id year date_birth sex  household event_type date_event   cesium
-#>    1:   1 1986 1975-08-19   M     Hunter       <NA>       <NA> 8.926435
-#>    2:   1 1987 1975-08-19   M     Hunter       <NA>       <NA> 8.926435
-#>    3:   1 1988 1975-08-19   M     Hunter       <NA>       <NA> 8.926435
-#>    4:   1 1989 1975-08-19   M     Hunter       <NA>       <NA> 8.897168
-#>    5:   1 1990 1975-08-19   M     Hunter       <NA>       <NA> 8.897168
-#>   ---                                                                  
-#> 2280: 100 2016 1940-12-23   W Non-hunter       <NA>       <NA> 3.498142
-#> 2281: 100 2017 1940-12-23   W Non-hunter       <NA>       <NA> 3.498142
-#> 2282: 100 2018 1940-12-23   W Non-hunter       <NA>       <NA> 3.498142
-#> 2283: 100 2019 1940-12-23   W Non-hunter       <NA>       <NA> 3.498142
-#> 2284: 100 2020 1940-12-23   W Non-hunter       <NA>       <NA> 3.498142
+print(dose_data, nrow = 10)
+#>          id  year date_birth    sex  household event_type date_event   cesium
+#>       <int> <int>     <Date> <char>     <char>     <char>     <Date>    <num>
+#>    1:     1  1986 1975-08-19      M     Hunter       <NA>       <NA> 8.926435
+#>    2:     1  1987 1975-08-19      M     Hunter       <NA>       <NA> 8.926435
+#>    3:     1  1988 1975-08-19      M     Hunter       <NA>       <NA> 8.926435
+#>    4:     1  1989 1975-08-19      M     Hunter       <NA>       <NA> 8.897168
+#>    5:     1  1990 1975-08-19      M     Hunter       <NA>       <NA> 8.897168
+#>   ---                                                                        
+#> 2280:   100  2016 1940-12-23      W Non-hunter       <NA>       <NA> 3.498142
+#> 2281:   100  2017 1940-12-23      W Non-hunter       <NA>       <NA> 3.498142
+#> 2282:   100  2018 1940-12-23      W Non-hunter       <NA>       <NA> 3.498142
+#> 2283:   100  2019 1940-12-23      W Non-hunter       <NA>       <NA> 3.498142
+#> 2284:   100  2020 1940-12-23      W Non-hunter       <NA>       <NA> 3.498142
 #>       municipality county
+#>              <int>  <int>
 #>    1:          382      3
 #>    2:          382      3
 #>    3:          382      3
@@ -75,7 +87,7 @@ calculation of each dose component (<code>dose_external</code>,
 follow-up time).
 
 ``` r
-doses_row <- calculate_dose(dose_data, organ_ls=c("Colon", "Thyroid"))
+doses_row <- calculate_dose(dose_data, organ_ls = c("Colon", "Thyroid"))
 ```
 
 To get the total absorbed dose under the follow-up period for each
