@@ -17,7 +17,7 @@ A data set in data.table format with 340 rows and 3 variables:
 Tondel, M., Gabrysch, K., Rääf, C., Isaksson, M. (2023)
 Estimating the organ absorbed dose in Swedish inhabitants
 following the Chernobyl Nuclear Power Plant accident with the
-R package absorbedDose. Uppsala University. doi: 10.33063/diva-484911.
+R package absorbedDose. Uppsala University. doi:10.33063/diva-484911.
 }
 \usage{
 tab_fshield
